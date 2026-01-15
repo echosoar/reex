@@ -116,7 +116,8 @@ struct FolderDetailView: View {
                 saveRecords()
             }
             
-            if let uploadURL = folder.uploadRecordURL, let taskId = taskId {
+            // Upload record if upload URL is configured (regardless of taskId)
+            if let uploadURL = folder.uploadRecordURL, !uploadURL.isEmpty {
                 await uploadRecord(record: record, to: uploadURL)
             }
         }

@@ -22,15 +22,23 @@ struct CommandExecutor {
                 task.standardOutput = outputPipe
                 task.standardError = errorPipe
                 
-                var outputData = Data()
-                var errorData = Data()
+                // Thread-safe data collection
+                let outputData = NSMutableData()
+                let errorData = NSMutableData()
+                let dataLock = NSLock()
                 
                 outputPipe.fileHandleForReading.readabilityHandler = { handle in
-                    outputData.append(handle.availableData)
+                    let data = handle.availableData
+                    dataLock.lock()
+                    outputData.append(data)
+                    dataLock.unlock()
                 }
                 
                 errorPipe.fileHandleForReading.readabilityHandler = { handle in
-                    errorData.append(handle.availableData)
+                    let data = handle.availableData
+                    dataLock.lock()
+                    errorData.append(data)
+                    dataLock.unlock()
                 }
                 
                 do {
@@ -40,11 +48,13 @@ struct CommandExecutor {
                     outputPipe.fileHandleForReading.readabilityHandler = nil
                     errorPipe.fileHandleForReading.readabilityHandler = nil
                     
+                    dataLock.lock()
                     outputData.append(outputPipe.fileHandleForReading.readDataToEndOfFile())
                     errorData.append(errorPipe.fileHandleForReading.readDataToEndOfFile())
+                    dataLock.unlock()
                     
-                    let output = String(data: outputData, encoding: .utf8) ?? ""
-                    let error = String(data: errorData, encoding: .utf8) ?? ""
+                    let output = String(data: outputData as Data, encoding: .utf8) ?? ""
+                    let error = String(data: errorData as Data, encoding: .utf8) ?? ""
                     
                     let combinedOutput = output + (error.isEmpty ? "" : "\n\nErrors:\n\(error)")
                     

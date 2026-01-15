@@ -54,7 +54,8 @@ struct FolderListView: View {
     
     private func binding(for folder: Folder) -> Binding<Folder> {
         guard let index = folders.firstIndex(where: { $0.id == folder.id }) else {
-            fatalError("Folder not found")
+            // Return a binding to a dummy folder if not found (should not happen in normal operation)
+            return .constant(folder)
         }
         return Binding(
             get: { folders[index] },

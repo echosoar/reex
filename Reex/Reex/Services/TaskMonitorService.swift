@@ -6,6 +6,9 @@ class TaskMonitorService: ObservableObject {
     private var timers: [UUID: Timer] = [:]
     private var lastExecutedTasks: [UUID: String] = [:]
     
+    // Polling interval in seconds (configurable)
+    static let pollingInterval: TimeInterval = 60.0
+    
     func startMonitoring(folder: Binding<Folder>, onExecute: @escaping (Command, [String: String], String?) -> Void) {
         let folderId = folder.wrappedValue.id
         
@@ -14,7 +17,7 @@ class TaskMonitorService: ObservableObject {
         
         activeFolders.insert(folderId)
         
-        let timer = Timer.scheduledTimer(withTimeInterval: 60.0, repeats: true) { [weak self] _ in
+        let timer = Timer.scheduledTimer(withTimeInterval: Self.pollingInterval, repeats: true) { [weak self] _ in
             Task {
                 await self?.checkTasks(folder: folder, onExecute: onExecute)
             }
