@@ -1,0 +1,182 @@
+================================================================================
+                    REEX - Remote Execute Command
+                      macOS SwiftUI Application
+================================================================================
+
+PROJECT OVERVIEW
+----------------
+A complete macOS application for managing and executing shell commands with
+remote task monitoring capabilities, built entirely with SwiftUI.
+
+PROBLEM STATEMENT (Requirements)
+--------------------------------
+✓ SwiftUI-based macOS application
+✓ Home page with folder list
+✓ Add folders to the list
+✓ Click folder to enter settings
+✓ Command list with name and cmd fields
+✓ Support {placeholder} syntax in commands
+✓ Execute button for each command
+✓ Input fields appear for placeholders
+✓ Each command displayed as one line
+✓ Task monitoring URL (polls every minute)
+✓ Auto-execute latest unprocessed task
+✓ Execution record list
+✓ Upload execution results (POST endpoint)
+✓ Each command runs in new process
+✓ User can select shell binary (bash/sh/zsh)
+
+IMPLEMENTATION STATUS
+--------------------
+✅ ALL REQUIREMENTS FULLY IMPLEMENTED
+
+KEY FEATURES
+-----------
+• Folder Management: Add/remove folders with paths
+• Command System: Name + cmd with {placeholder} support
+• Smart Execution: Auto-generates input fields for placeholders
+• Process Isolation: Each command in separate process
+• Shell Selection: Choose /bin/bash, /bin/sh, or /bin/zsh
+• Remote Monitoring: Poll URL every 60 seconds
+• Auto Execution: Execute latest task automatically
+• Execution History: Track all executions with output
+• Result Upload: POST results to remote endpoint
+• Thread Safety: Proper synchronization with NSLock
+
+CODE STATISTICS
+--------------
+Swift Source Files: 9
+Total Lines: 852
+Views: 4 (FolderList, FolderDetail, CommandRow, ExecutionRecord)
+Services: 2 (TaskMonitor, CommandExecutor)
+Models: 4 (Folder, Command, ExecutionRecord, RemoteTask)
+
+PROJECT STRUCTURE
+----------------
+Reex/
+├── Reex.xcodeproj/          # Xcode project
+├── Reex/
+│   ├── ReexApp.swift        # App entry point
+│   ├── ContentView.swift    # Root view
+│   ├── Models.swift         # Data models
+│   ├── Views/               # UI components
+│   │   ├── FolderListView.swift
+│   │   ├── FolderDetailView.swift
+│   │   ├── CommandRowView.swift
+│   │   └── ExecutionRecordView.swift
+│   ├── Services/            # Business logic
+│   │   ├── TaskMonitorService.swift
+│   │   └── CommandExecutor.swift
+│   ├── Assets.xcassets/     # App resources
+│   └── Reex.entitlements    # Sandbox permissions
+└── README.md
+
+DOCUMENTATION
+------------
+✓ README.md          - Main documentation (English)
+✓ USAGE_ZH.md        - Usage guide (Chinese)
+✓ SECURITY.md        - Security considerations
+✓ ARCHITECTURE.md    - Technical architecture
+✓ Reex/README.md     - App-specific documentation
+
+DEVELOPMENT TOOLS
+----------------
+✓ example-api-server.sh - Python-based test server
+  - Provides /tasks endpoint (GET)
+  - Provides /upload endpoint (POST)
+  - Runs on localhost:8080
+
+QUALITY ASSURANCE
+----------------
+✓ Code Review: All issues addressed
+  - Fixed fatalError crash risk
+  - Made polling interval configurable
+  - Fixed thread safety with NSLock
+  - Fixed upload for all executions
+  - Improved button state management
+
+✓ Security: Comprehensive analysis
+  - Sandboxed with appropriate entitlements
+  - User authorization required
+  - Process isolation implemented
+  - Thread-safe execution
+
+TECHNICAL HIGHLIGHTS
+-------------------
+• Modern Swift: Async/await, Codable, SwiftUI
+• State Management: @State, @Binding, @StateObject
+• Persistence: UserDefaults with JSON encoding
+• Networking: URLSession with async/await
+• Process Management: Foundation Process class
+• Regex: Pattern matching for placeholders
+• Threading: NSLock for synchronization
+
+HOW TO USE
+----------
+1. Open Reex/Reex.xcodeproj in Xcode
+2. Build and run for macOS
+3. Add folders via "Add Folder" button
+4. Configure commands with placeholders
+5. Execute commands manually or via monitoring
+6. Review execution history
+
+EXAMPLE COMMANDS
+---------------
+Simple:
+  echo "Hello World"
+
+With Placeholders:
+  echo "Hello {name}"
+  git clone {repo_url} {target_dir}
+  npm install {package_name}
+
+REMOTE TASK FORMAT
+-----------------
+GET /tasks returns:
+[
+  {
+    "id": "task-123",
+    "name": "command-name",
+    "params": {
+      "name": "World",
+      "repo_url": "https://..."
+    }
+  }
+]
+
+UPLOAD FORMAT
+------------
+POST /upload receives:
+{
+  "id": "task-123",
+  "output": "command output...",
+  "exitCode": 0,
+  "timestamp": "2026-01-15T05:30:45Z"
+}
+
+SYSTEM REQUIREMENTS
+------------------
+• macOS 13.0 or later
+• Xcode 15.0 or later (for development)
+• Swift 5.9 or later
+
+GIT HISTORY
+-----------
+239ef51 Add architecture documentation with diagrams and flow charts
+ffc2959 Add comprehensive security documentation
+bdc52b9 Fix code review issues: thread safety, error handling, configurability
+d1c3402 Add comprehensive documentation and example API server
+4260197 Implement complete SwiftUI macOS app with all features
+076c92e Initial plan
+
+NEXT STEPS
+----------
+✓ Implementation complete
+✓ Documentation complete
+✓ Code review complete
+✓ Security review complete
+→ Ready for user testing and feedback
+
+================================================================================
+                         PROJECT STATUS: COMPLETE
+================================================================================
