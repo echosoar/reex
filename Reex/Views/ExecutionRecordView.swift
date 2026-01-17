@@ -3,6 +3,7 @@ import SwiftUI
 struct ExecutionRecordView: View {
     @Binding var records: [ExecutionRecord]
     @State private var selectedRecord: ExecutionRecord?
+    @State private var showingDetail = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -16,40 +17,40 @@ struct ExecutionRecordView: View {
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
-                List(records, selection: $selectedRecord) { record in
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Text(record.commandName)
-                                .font(.subheadline)
-                                .fontWeight(.medium)
-                            
-                            Spacer()
-                            
-                            if record.exitCode == 0 {
-                                Image(systemName: "checkmark.circle.fill")
-                                    .foregroundColor(.green)
-                            } else {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(.red)
+                List(records) { record in
+                    Button(action: {
+                        selectedRecord = record
+                        showingDetail = true
+                    }) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Text(record.commandName)
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                                
+                                Spacer()
+                                
+                                if record.exitCode == 0 {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.green)
+                                } else {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundColor(.red)
+                                }
+                                
+                                Text(formatDate(record.timestamp))
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
                             }
                             
-                            Text(formatDate(record.timestamp))
-                                .font(.caption)
+                            Text(record.command)
+                                .font(.system(.caption, design: .monospaced))
                                 .foregroundColor(.secondary)
+                                .lineLimit(1)
                         }
-                        
-                        Text(record.command)
-                            .font(.system(.caption, design: .monospaced))
-                            .foregroundColor(.secondary)
-                            .lineLimit(1)
-                        
-                        if let taskId = record.taskId {
-                            Text("Task ID: \(taskId)")
-                                .font(.caption)
-                                .foregroundColor(.blue)
-                        }
+                        .padding(.vertical, 4)
                     }
-                    .padding(.vertical, 4)
+                    .buttonStyle(.plain)
                     .contextMenu {
                         Button("Copy Output") {
                             NSPasteboard.general.clearContents()
@@ -60,8 +61,10 @@ struct ExecutionRecordView: View {
                 .listStyle(.inset)
             }
         }
-        .sheet(item: $selectedRecord) { record in
-            RecordDetailView(record: record)
+        .sheet(isPresented: $showingDetail) {
+            if let record = selectedRecord {
+                RecordDetailView(record: record)
+            }
         }
     }
     
@@ -92,13 +95,7 @@ struct RecordDetailView: View {
             
             Group {
                 LabeledContent("Command Name", value: record.commandName)
-                
-                if let taskId = record.taskId {
-                    LabeledContent("Task ID", value: taskId)
-                }
-                
                 LabeledContent("Exit Code", value: "\(record.exitCode)")
-                
                 LabeledContent("Timestamp", value: formatDate(record.timestamp))
                 
                 VStack(alignment: .leading) {

@@ -70,15 +70,11 @@ struct CommandRowView: View {
     }
     
     private func executeCommand() {
-        // Prevent multiple executions
         guard !isExecuting else { return }
         isExecuting = true
         
-        // Execute the command
         onExecute(command, placeholderValues)
         
-        // Reset after a brief delay to prevent rapid repeated clicks
-        // The actual command execution is async and happens in the background
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             isExecuting = false
         }

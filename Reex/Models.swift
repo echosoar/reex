@@ -5,17 +5,13 @@ struct Folder: Identifiable, Codable {
     var name: String
     var path: String
     var commands: [Command]
-    var taskMonitorURL: String?
-    var uploadRecordURL: String?
     var shellPath: String
     
-    init(id: UUID = UUID(), name: String, path: String, commands: [Command] = [], taskMonitorURL: String? = nil, uploadRecordURL: String? = nil, shellPath: String = "/bin/bash") {
+    init(id: UUID = UUID(), name: String, path: String, commands: [Command] = [], shellPath: String = "/bin/bash") {
         self.id = id
         self.name = name
         self.path = path
         self.commands = commands
-        self.taskMonitorURL = taskMonitorURL
-        self.uploadRecordURL = uploadRecordURL
         self.shellPath = shellPath
     }
 }
@@ -58,26 +54,18 @@ struct Command: Identifiable, Codable {
 
 struct ExecutionRecord: Identifiable, Codable {
     let id: UUID
-    var taskId: String?
     var commandName: String
     var command: String
     var output: String
     var timestamp: Date
     var exitCode: Int32
     
-    init(id: UUID = UUID(), taskId: String? = nil, commandName: String, command: String, output: String, timestamp: Date = Date(), exitCode: Int32 = 0) {
+    init(id: UUID = UUID(), commandName: String, command: String, output: String, timestamp: Date = Date(), exitCode: Int32 = 0) {
         self.id = id
-        self.taskId = taskId
         self.commandName = commandName
         self.command = command
         self.output = output
         self.timestamp = timestamp
         self.exitCode = exitCode
     }
-}
-
-struct RemoteTask: Codable {
-    let id: String
-    let name: String
-    let params: [String: String]
 }

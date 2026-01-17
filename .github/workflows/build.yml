@@ -1,0 +1,35 @@
+name: macOS Build
+
+on:
+  push:
+    branches:
+      - 'copilot/**'
+  pull_request:
+    branches:
+      - 'copilot/**'
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_15.2.app/Contents/Developer
+      
+      - name: Build project
+        run: |
+          xcodebuild clean build \
+            -project Reex.xcodeproj \
+            -scheme Reex \
+            -configuration Release \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+      
+      - name: Check build artifacts
+        run: |
+          ls -la build/Build/Products/Release/

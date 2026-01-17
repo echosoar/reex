@@ -10,6 +10,16 @@ struct FolderListView: View {
     var body: some View {
         NavigationSplitView {
             VStack {
+                HStack {
+                    Text("Folders")
+                        .font(.headline)
+                    Spacer()
+                    Button(action: { showingAddFolder = true }) {
+                        Label("Add Folder", systemImage: "plus")
+                    }
+                }
+                .padding()
+                
                 List(selection: $selectedFolder) {
                     ForEach(folders) { folder in
                         NavigationLink(value: folder) {
@@ -24,16 +34,8 @@ struct FolderListView: View {
                     }
                     .onDelete(perform: deleteFolders)
                 }
-                
-                HStack {
-                    Button(action: { showingAddFolder = true }) {
-                        Label("Add Folder", systemImage: "plus")
-                    }
-                    Spacer()
-                }
-                .padding()
             }
-            .navigationTitle("Folders")
+            .navigationSplitViewColumnWidth(min: 200, ideal: 250)
         } detail: {
             if let folder = selectedFolder {
                 FolderDetailView(folder: binding(for: folder))
@@ -54,7 +56,6 @@ struct FolderListView: View {
     
     private func binding(for folder: Folder) -> Binding<Folder> {
         guard let index = folders.firstIndex(where: { $0.id == folder.id }) else {
-            // Return a binding to a dummy folder if not found (should not happen in normal operation)
             return .constant(folder)
         }
         return Binding(

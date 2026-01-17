@@ -22,7 +22,6 @@ struct CommandExecutor {
                 task.standardOutput = outputPipe
                 task.standardError = errorPipe
                 
-                // Thread-safe data collection
                 let outputData = NSMutableData()
                 let errorData = NSMutableData()
                 let dataLock = NSLock()

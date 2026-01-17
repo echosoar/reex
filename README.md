@@ -1,22 +1,22 @@
 # Reex - Remote Execute Command
 
-A SwiftUI-based macOS application for managing and executing commands in different folders with remote task monitoring capabilities.
+A SwiftUI-based macOS application for managing and executing commands in different folders.
 
-## Overview
+## Features
 
-Reex allows you to:
-- Manage folders with custom command lists
-- Execute commands with placeholder support
-- Monitor remote task queues and auto-execute commands
-- Track execution history with detailed logs
-- Upload execution results to remote endpoints
-- Choose different shell binaries (bash, sh, zsh)
+- **Folder Management**: Add folders to manage commands for different projects
+- **Command Execution**: Define commands with placeholders like `{name}` for dynamic values
+- **Execution History**: View all command executions with timestamps and output
+- **Shell Selection**: Choose between /bin/bash, /bin/sh, or /bin/zsh
+- **Process Isolation**: Each command runs in a separate process
 
-See [Reex/README.md](Reex/README.md) for detailed documentation.
+## Building
 
-## Quick Start
+```bash
+xcodebuild -project Reex.xcodeproj -scheme Reex -configuration Release
+```
 
-1. Open `Reex/Reex.xcodeproj` in Xcode
-2. Build and run the application
-3. Add folders and configure commands
-4. Execute commands or set up remote monitoring
+## Requirements
+
+- macOS 13.0 or later
+- Xcode 15.0 or later

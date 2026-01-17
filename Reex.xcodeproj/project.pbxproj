@@ -14,8 +14,7 @@
 		A1000001000000000000005 /* FolderDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001000000000000015 /* FolderDetailView.swift */; };
 		A1000001000000000000006 /* CommandRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001000000000000016 /* CommandRowView.swift */; };
 		A1000001000000000000007 /* ExecutionRecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001000000000000017 /* ExecutionRecordView.swift */; };
-		A1000001000000000000008 /* TaskMonitorService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001000000000000018 /* TaskMonitorService.swift */; };
-		A1000001000000000000009 /* CommandExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001000000000000019 /* CommandExecutor.swift */; };
+		A1000001000000000000008 /* CommandExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001000000000000018 /* CommandExecutor.swift */; };
 		A100000100000000000000A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A100000100000000000001A /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
@@ -28,8 +27,7 @@
 		A1000001000000000000015 /* FolderDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderDetailView.swift; sourceTree = "<group>"; };
 		A1000001000000000000016 /* CommandRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandRowView.swift; sourceTree = "<group>"; };
 		A1000001000000000000017 /* ExecutionRecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionRecordView.swift; sourceTree = "<group>"; };
-		A1000001000000000000018 /* TaskMonitorService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskMonitorService.swift; sourceTree = "<group>"; };
-		A1000001000000000000019 /* CommandExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandExecutor.swift; sourceTree = "<group>"; };
+		A1000001000000000000018 /* CommandExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandExecutor.swift; sourceTree = "<group>"; };
 		A100000100000000000001A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A100000100000000000001B /* Reex.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Reex.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -89,8 +87,7 @@
 		A1000001000000000000031 /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				A1000001000000000000018 /* TaskMonitorService.swift */,
-				A1000001000000000000019 /* CommandExecutor.swift */,
+				A1000001000000000000018 /* CommandExecutor.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -171,8 +168,7 @@
 				A1000001000000000000005 /* FolderDetailView.swift in Sources */,
 				A1000001000000000000006 /* CommandRowView.swift in Sources */,
 				A1000001000000000000007 /* ExecutionRecordView.swift in Sources */,
-				A1000001000000000000008 /* TaskMonitorService.swift in Sources */,
-				A1000001000000000000009 /* CommandExecutor.swift in Sources */,
+				A1000001000000000000008 /* CommandExecutor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

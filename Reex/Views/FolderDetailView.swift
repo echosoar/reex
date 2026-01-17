@@ -6,10 +6,10 @@ struct FolderDetailView: View {
     @State private var showingAddCommand = false
     @State private var newCommandName = ""
     @State private var newCommandCmd = ""
-    @EnvironmentObject var taskMonitor: TaskMonitorService
     
     var body: some View {
         VStack(spacing: 0) {
+            // Folder settings
             Form {
                 Section("Folder Settings") {
                     TextField("Folder Name", text: $folder.name)
@@ -22,37 +22,13 @@ struct FolderDetailView: View {
                         Text("/bin/zsh").tag("/bin/zsh")
                     }
                 }
-                
-                Section("Task Monitor") {
-                    TextField("Monitor URL (optional)", text: Binding(
-                        get: { folder.taskMonitorURL ?? "" },
-                        set: { folder.taskMonitorURL = $0.isEmpty ? nil : $0 }
-                    ))
-                    
-                    TextField("Upload Record URL (optional)", text: Binding(
-                        get: { folder.uploadRecordURL ?? "" },
-                        set: { folder.uploadRecordURL = $0.isEmpty ? nil : $0 }
-                    ))
-                    
-                    if let monitorURL = folder.taskMonitorURL, !monitorURL.isEmpty {
-                        Button("Start Monitoring") {
-                            taskMonitor.startMonitoring(folder: $folder, onExecute: executeCommand)
-                        }
-                        .disabled(taskMonitor.isMonitoring(folderId: folder.id))
-                        
-                        if taskMonitor.isMonitoring(folderId: folder.id) {
-                            Text("Monitoring active...")
-                                .font(.caption)
-                                .foregroundColor(.green)
-                        }
-                    }
-                }
             }
             .formStyle(.grouped)
-            .frame(height: 350)
+            .frame(height: 200)
             
             Divider()
             
+            // Command list
             VStack(alignment: .leading, spacing: 10) {
                 HStack {
                     Text("Commands")
@@ -72,7 +48,7 @@ struct FolderDetailView: View {
                                 command: command,
                                 folder: folder,
                                 onExecute: { cmd, params in
-                                    executeCommand(command: cmd, params: params, taskId: nil)
+                                    executeCommand(command: cmd, params: params)
                                 }
                             )
                         }
@@ -83,6 +59,7 @@ struct FolderDetailView: View {
             
             Divider()
             
+            // Execution records
             ExecutionRecordView(records: $executionRecords)
                 .frame(height: 200)
         }
@@ -96,7 +73,7 @@ struct FolderDetailView: View {
         .onAppear(perform: loadRecords)
     }
     
-    private func executeCommand(command: Command, params: [String: String], taskId: String?) {
+    private func executeCommand(command: Command, params: [String: String]) {
         let resolvedCmd = command.resolve(placeholders: params)
         
         Task {
@@ -104,7 +81,6 @@ struct FolderDetailView: View {
             let result = await executor.execute(command: resolvedCmd)
             
             let record = ExecutionRecord(
-                taskId: taskId,
                 commandName: command.name,
                 command: resolvedCmd,
                 output: result.output,
@@ -115,35 +91,6 @@ struct FolderDetailView: View {
                 executionRecords.insert(record, at: 0)
                 saveRecords()
             }
-            
-            // Upload record if upload URL is configured (regardless of taskId)
-            if let uploadURL = folder.uploadRecordURL, !uploadURL.isEmpty {
-                await uploadRecord(record: record, to: uploadURL)
-            }
-        }
-    }
-    
-    private func uploadRecord(record: ExecutionRecord, to urlString: String) async {
-        guard let url = URL(string: urlString) else { return }
-        
-        let payload: [String: Any] = [
-            "id": record.taskId ?? "",
-            "output": record.output,
-            "exitCode": record.exitCode,
-            "timestamp": ISO8601DateFormatter().string(from: record.timestamp)
-        ]
-        
-        guard let jsonData = try? JSONSerialization.data(withJSONObject: payload) else { return }
-        
-        var request = URLRequest(url: url)
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = jsonData
-        
-        do {
-            let (_, _) = try await URLSession.shared.data(for: request)
-        } catch {
-            print("Failed to upload record: \(error)")
         }
     }
     
