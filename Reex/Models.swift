@@ -1,6 +1,6 @@
 import Foundation
 
-struct Folder: Identifiable, Codable {
+struct Folder: Identifiable, Codable, Hashable {
     let id: UUID
     var name: String
     var path: String
@@ -14,9 +14,17 @@ struct Folder: Identifiable, Codable {
         self.commands = commands
         self.shellPath = shellPath
     }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    static func == (lhs: Folder, rhs: Folder) -> Bool {
+        lhs.id == rhs.id
+    }
 }
 
-struct Command: Identifiable, Codable {
+struct Command: Identifiable, Codable, Hashable {
     let id: UUID
     var name: String
     var cmd: String
@@ -25,6 +33,14 @@ struct Command: Identifiable, Codable {
         self.id = id
         self.name = name
         self.cmd = cmd
+    }
+    
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+    
+    static func == (lhs: Command, rhs: Command) -> Bool {
+        lhs.id == rhs.id
     }
     
     func placeholders() -> [String] {
