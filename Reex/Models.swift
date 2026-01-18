@@ -6,13 +6,15 @@ struct Folder: Identifiable, Codable, Hashable {
     var path: String
     var commands: [Command]
     var shellPath: String
+    var bookmarkData: Data?
     
-    init(id: UUID = UUID(), name: String, path: String, commands: [Command] = [], shellPath: String = "/bin/bash") {
+    init(id: UUID = UUID(), name: String, path: String, commands: [Command] = [], shellPath: String = "/bin/bash", bookmarkData: Data? = nil) {
         self.id = id
         self.name = name
         self.path = path
         self.commands = commands
         self.shellPath = shellPath
+        self.bookmarkData = bookmarkData
     }
     
     func hash(into hasher: inout Hasher) {
@@ -24,7 +26,35 @@ struct Folder: Identifiable, Codable, Hashable {
         lhs.name == rhs.name &&
         lhs.path == rhs.path &&
         lhs.commands == rhs.commands &&
-        lhs.shellPath == rhs.shellPath
+        lhs.shellPath == rhs.shellPath &&
+        lhs.bookmarkData == rhs.bookmarkData
+    }
+    
+    // Helper to access the directory with security-scoped bookmark
+    func accessSecurityScopedResource() -> URL? {
+        guard let bookmarkData = bookmarkData else {
+            return URL(fileURLWithPath: path)
+        }
+        
+        var isStale = false
+        guard let url = try? URL(resolvingBookmarkData: bookmarkData,
+                                  options: .withSecurityScope,
+                                  relativeTo: nil,
+                                  bookmarkDataIsStale: &isStale) else {
+            return URL(fileURLWithPath: path)
+        }
+        
+        return url
+    }
+    
+    func startAccessingSecurityScopedResource() -> Bool {
+        guard let url = accessSecurityScopedResource() else { return false }
+        return url.startAccessingSecurityScopedResource()
+    }
+    
+    func stopAccessingSecurityScopedResource() {
+        guard let url = accessSecurityScopedResource() else { return }
+        url.stopAccessingSecurityScopedResource()
     }
 }
 

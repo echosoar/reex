@@ -77,6 +77,14 @@ struct FolderDetailView: View {
         let resolvedCmd = command.resolve(placeholders: params)
         
         Task {
+            // Start accessing security-scoped resource
+            let accessGranted = folder.startAccessingSecurityScopedResource()
+            defer {
+                if accessGranted {
+                    folder.stopAccessingSecurityScopedResource()
+                }
+            }
+            
             let executor = CommandExecutor(shellPath: folder.shellPath, workingDirectory: folder.path)
             let result = await executor.execute(command: resolvedCmd)
             

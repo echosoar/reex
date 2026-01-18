@@ -37,8 +37,8 @@ struct CommandRowView: View {
             if !placeholders.isEmpty {
                 VStack(alignment: .leading, spacing: 4) {
                     ForEach(placeholders, id: \.self) { placeholder in
-                        HStack {
-                            Text("{\(placeholder)}")
+                        HStack(alignment: .top) {
+                            Text("\(placeholder)")
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                                 .frame(width: 100, alignment: .trailing)

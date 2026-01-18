@@ -6,6 +6,7 @@ struct FolderListView: View {
     @State private var showingAddFolder = false
     @State private var newFolderName = ""
     @State private var newFolderPath = ""
+    @State private var newFolderURL: URL?
     
     var body: some View {
         NavigationSplitView {
@@ -53,7 +54,10 @@ struct FolderListView: View {
             AddFolderSheet(
                 folderName: $newFolderName,
                 folderPath: $newFolderPath,
-                onAdd: addFolder
+                folderURL: $newFolderURL,
+                onAdd: {
+                    addFolder(url: newFolderURL)
+                }
             )
         }
         .onChange(of: folders) { newFolders in
@@ -85,12 +89,24 @@ struct FolderListView: View {
         )
     }
     
-    private func addFolder() {
-        let folder = Folder(name: newFolderName, path: newFolderPath)
+    private func addFolder(url: URL?) {
+        var bookmarkData: Data?
+        if let url = url {
+            do {
+                bookmarkData = try url.bookmarkData(options: .withSecurityScope,
+                                                   includingResourceValuesForKeys: nil,
+                                                   relativeTo: nil)
+            } catch {
+                print("Failed to create bookmark: \(error)")
+            }
+        }
+        
+        let folder = Folder(name: newFolderName, path: newFolderPath, bookmarkData: bookmarkData)
         folders.append(folder)
         saveFolders()
         newFolderName = ""
         newFolderPath = ""
+        newFolderURL = nil
         showingAddFolder = false
     }
     
@@ -152,6 +168,7 @@ struct FolderListView: View {
 struct AddFolderSheet: View {
     @Binding var folderName: String
     @Binding var folderPath: String
+    @Binding var folderURL: URL?
     let onAdd: () -> Void
     @Environment(\.dismiss) private var dismiss
     
@@ -166,6 +183,7 @@ struct AddFolderSheet: View {
             HStack {
                 TextField("Folder Path", text: $folderPath)
                     .textFieldStyle(.roundedBorder)
+                    .disabled(true)
                 
                 Button("Choose...") {
                     let panel = NSOpenPanel()
@@ -173,6 +191,7 @@ struct AddFolderSheet: View {
                     panel.canChooseDirectories = true
                     panel.allowsMultipleSelection = false
                     if panel.runModal() == .OK, let url = panel.url {
+                        folderURL = url
                         folderPath = url.path
                         if folderName.isEmpty {
                             folderName = url.lastPathComponent
