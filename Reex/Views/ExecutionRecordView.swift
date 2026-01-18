@@ -60,65 +60,55 @@ struct ExecutionRecordRow: View {
 
 struct ExecutionRecordView: View {
     @Binding var records: [ExecutionRecord]
-    @State private var selectedRecord: ExecutionRecord?
+    var onClear: (() -> Void)?
+    @State private var showingClearConfirmation = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Execution Records")
-                .font(.headline)
-                .padding(.horizontal)
-                .padding(.top, 8)
+            HStack {
+                Text("Execution Records")
+                    .font(.headline)
+
+                Spacer()
+
+                Button(role: .destructive) {
+                    showingClearConfirmation = true
+                } label: {
+                    Label("Clear", systemImage: "trash")
+                }
+                .disabled(records.isEmpty)
+                .help("Clear all execution records")
+            }
+            .padding(.horizontal)
+            .padding(.top, 8)
             
             if records.isEmpty {
                 Text("No execution records yet")
                     .foregroundColor(.secondary)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .frame(maxWidth: .infinity)
+                    .padding()
             } else {
-                List(records) { record in
-                    Button(action: {
-                        selectedRecord = record
-                    }) {
-                        VStack(alignment: .leading, spacing: 4) {
-                            HStack {
-                                Text(record.commandName)
-                                    .font(.subheadline)
-                                    .fontWeight(.medium)
-                                
-                                Spacer()
-                                
-                                if record.exitCode == 0 {
-                                    Image(systemName: "checkmark.circle.fill")
-                                        .foregroundColor(.green)
-                                } else {
-                                    Image(systemName: "xmark.circle.fill")
-                                        .foregroundColor(.red)
-                                }
-                                
-                                Text(formatDate(record.timestamp))
-                                    .font(.caption)
-                                    .foregroundColor(.secondary)
-                            }
-                            
-                            Text(record.command)
-                                .font(.system(.caption, design: .monospaced))
-                                .foregroundColor(.secondary)
-                                .lineLimit(1)
-                        }
-                        .padding(.vertical, 4)
-                    }
-                    .buttonStyle(.plain)
-                    .contextMenu {
-                        Button("Copy Output") {
-                            NSPasteboard.general.clearContents()
-                            NSPasteboard.general.setString(record.output, forType: .string)
-                        }
+                LazyVStack(spacing: 8) {
+                    ForEach(records) { record in
+                        ExecutionRecordRow(record: record)
                     }
                 }
-                .listStyle(.inset)
+                .padding(.horizontal)
             }
         }
-        .sheet(item: $selectedRecord) { record in
-            RecordDetailView(record: record)
+        
+
+        .alert("Clear all records?", isPresented: $showingClearConfirmation) {
+            Button("Clear", role: .destructive) {
+                if let onClear = onClear {
+                    onClear()
+                } else {
+                    records.removeAll()
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("Are you sure you want to clear all execution records? This cannot be undone.")
         }
     }
     

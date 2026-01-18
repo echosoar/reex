@@ -72,26 +72,11 @@ struct FolderDetailView: View {
                 Divider()
                     .padding(.horizontal)
                 
-                // Execution records
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("Execution Records")
-                        .font(.headline)
-                        .padding(.horizontal)
-                    
-                    if executionRecords.isEmpty {
-                        Text("No execution records yet")
-                            .foregroundColor(.secondary)
-                            .frame(maxWidth: .infinity)
-                            .padding()
-                    } else {
-                        LazyVStack(spacing: 8) {
-                            ForEach(executionRecords) { record in
-                                ExecutionRecordRow(record: record)
-                            }
-                        }
-                        .padding(.horizontal)
-                    }
-                }
+                // Execution records (use ExecutionRecordView which has clear button)
+                ExecutionRecordView(records: $executionRecords, onClear: {
+                    executionRecords.removeAll()
+                    saveRecords()
+                })
                 .padding(.bottom, 20)
             }
             .padding(.top)
