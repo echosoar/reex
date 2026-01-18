@@ -96,9 +96,14 @@ struct FolderDetailView: View {
     
     private func addCommand() {
         let command = Command(name: newCommandName, cmd: newCommandCmd)
+        
+        // Create a new folder with the updated commands array
         var updatedFolder = folder
         updatedFolder.commands.append(command)
+        
+        // Assign the updated folder back to trigger the binding setter
         folder = updatedFolder
+        
         newCommandName = ""
         newCommandCmd = ""
         showingAddCommand = false

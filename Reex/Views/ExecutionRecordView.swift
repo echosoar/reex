@@ -3,7 +3,6 @@ import SwiftUI
 struct ExecutionRecordView: View {
     @Binding var records: [ExecutionRecord]
     @State private var selectedRecord: ExecutionRecord?
-    @State private var showingDetail = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -20,7 +19,6 @@ struct ExecutionRecordView: View {
                 List(records) { record in
                     Button(action: {
                         selectedRecord = record
-                        showingDetail = true
                     }) {
                         VStack(alignment: .leading, spacing: 4) {
                             HStack {
@@ -61,10 +59,8 @@ struct ExecutionRecordView: View {
                 .listStyle(.inset)
             }
         }
-        .sheet(isPresented: $showingDetail) {
-            if let record = selectedRecord {
-                RecordDetailView(record: record)
-            }
+        .sheet(item: $selectedRecord) { record in
+            RecordDetailView(record: record)
         }
     }
     
@@ -91,7 +87,10 @@ struct RecordDetailView: View {
                 Button("Close") {
                     dismiss()
                 }
+                .keyboardShortcut(.cancelAction)
             }
+            
+            Divider()
             
             Group {
                 LabeledContent("Command Name", value: record.commandName)
@@ -120,17 +119,16 @@ struct RecordDetailView: View {
                         .textSelection(.enabled)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .frame(maxHeight: .infinity)
-                .border(Color.gray.opacity(0.3))
-            }
-            
-            Button("Copy Output") {
-                NSPasteboard.general.clearContents()
-                NSPasteboard.general.setString(record.output, forType: .string)
+                
+                Button("Copy Output") {
+                    NSPasteboard.general.clearContents()
+                    NSPasteboard.general.setString(record.output, forType: .string)
+                }
+                .padding(.top, 8)
             }
         }
-        .padding()
-        .frame(width: 600, height: 500)
+        .padding(20)
+        .frame(minWidth: 600, minHeight: 500)
     }
     
     private func formatDate(_ date: Date) -> String {

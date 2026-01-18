@@ -56,6 +56,13 @@ struct FolderListView: View {
                 onAdd: addFolder
             )
         }
+        .onChange(of: folders) { newFolders in
+            // Update selectedFolder if it exists in the new folders array
+            if let selectedFolder = selectedFolder,
+               let updatedFolder = newFolders.first(where: { $0.id == selectedFolder.id }) {
+                self.selectedFolder = updatedFolder
+            }
+        }
         .onAppear(perform: loadFolders)
     }
     
@@ -64,8 +71,17 @@ struct FolderListView: View {
             return .constant(folder)
         }
         return Binding(
-            get: { folders[index] },
-            set: { folders[index] = $0; saveFolders() }
+            get: { 
+                return self.folders[index] 
+            },
+            set: { newValue in
+                self.folders[index] = newValue
+                self.saveFolders()
+                
+                // Force SwiftUI to detect the change by updating the entire array
+                let updatedFolders = self.folders
+                self.folders = updatedFolders
+            }
         )
     }
     

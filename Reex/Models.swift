@@ -20,7 +20,11 @@ struct Folder: Identifiable, Codable, Hashable {
     }
     
     static func == (lhs: Folder, rhs: Folder) -> Bool {
-        lhs.id == rhs.id
+        lhs.id == rhs.id &&
+        lhs.name == rhs.name &&
+        lhs.path == rhs.path &&
+        lhs.commands == rhs.commands &&
+        lhs.shellPath == rhs.shellPath
     }
 }
 
@@ -40,7 +44,9 @@ struct Command: Identifiable, Codable, Hashable {
     }
     
     static func == (lhs: Command, rhs: Command) -> Bool {
-        lhs.id == rhs.id
+        lhs.id == rhs.id &&
+        lhs.name == rhs.name &&
+        lhs.cmd == rhs.cmd
     }
     
     func placeholders() -> [String] {
