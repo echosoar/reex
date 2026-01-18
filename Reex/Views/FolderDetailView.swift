@@ -8,60 +8,93 @@ struct FolderDetailView: View {
     @State private var newCommandCmd = ""
     
     var body: some View {
-        VStack(spacing: 0) {
-            // Folder settings
-            Form {
-                Section("Folder Settings") {
-                    TextField("Folder Name", text: $folder.name)
-                    TextField("Folder Path", text: $folder.path)
-                        .disabled(true)
-                    
-                    Picker("Shell Binary", selection: $folder.shellPath) {
-                        Text("/bin/bash").tag("/bin/bash")
-                        Text("/bin/sh").tag("/bin/sh")
-                        Text("/bin/zsh").tag("/bin/zsh")
-                    }
-                }
-            }
-            .formStyle(.grouped)
-            .frame(height: 200)
-            
-            Divider()
-            
-            // Command list
-            VStack(alignment: .leading, spacing: 10) {
-                HStack {
-                    Text("Commands")
+        ScrollView {
+            VStack(spacing: 20) {
+                // Folder settings
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Folder Settings")
                         .font(.headline)
-                    Spacer()
-                    Button(action: { showingAddCommand = true }) {
-                        Label("Add Command", systemImage: "plus")
+                        .padding(.horizontal)
+                    
+                    Form {
+                        Section {
+                            TextField("Folder Name", text: $folder.name)
+                            TextField("Folder Path", text: $folder.path)
+                                .disabled(true)
+                            
+                            Picker("Shell Binary", selection: $folder.shellPath) {
+                                Text("/bin/bash").tag("/bin/bash")
+                                Text("/bin/sh").tag("/bin/sh")
+                                Text("/bin/zsh").tag("/bin/zsh")
+                            }
+                        }
                     }
+                    .formStyle(.grouped)
+                    .frame(height: 180)
                 }
-                .padding(.horizontal)
-                .padding(.top)
                 
-                ScrollView {
-                    LazyVStack(spacing: 8) {
-                        ForEach(folder.commands) { command in
-                            CommandRowView(
-                                command: command,
-                                folder: folder,
-                                onExecute: { cmd, params in
-                                    executeCommand(command: cmd, params: params)
-                                }
-                            )
+                Divider()
+                    .padding(.horizontal)
+                
+                // Command list
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        Text("Commands")
+                            .font(.headline)
+                        Spacer()
+                        Button(action: { showingAddCommand = true }) {
+                            Label("Add Command", systemImage: "plus")
                         }
                     }
                     .padding(.horizontal)
+                    
+                    if folder.commands.isEmpty {
+                        Text("No commands yet")
+                            .foregroundColor(.secondary)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                    } else {
+                        LazyVStack(spacing: 8) {
+                            ForEach(folder.commands) { command in
+                                CommandRowView(
+                                    command: command,
+                                    folder: folder,
+                                    onExecute: { cmd, params in
+                                        executeCommand(command: cmd, params: params)
+                                    }
+                                )
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
                 }
+                
+                Divider()
+                    .padding(.horizontal)
+                
+                // Execution records
+                VStack(alignment: .leading, spacing: 10) {
+                    Text("Execution Records")
+                        .font(.headline)
+                        .padding(.horizontal)
+                    
+                    if executionRecords.isEmpty {
+                        Text("No execution records yet")
+                            .foregroundColor(.secondary)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                    } else {
+                        LazyVStack(spacing: 8) {
+                            ForEach(executionRecords) { record in
+                                ExecutionRecordRow(record: record)
+                            }
+                        }
+                        .padding(.horizontal)
+                    }
+                }
+                .padding(.bottom, 20)
             }
-            
-            Divider()
-            
-            // Execution records
-            ExecutionRecordView(records: $executionRecords)
-                .frame(height: 200)
+            .padding(.top)
         }
         .sheet(isPresented: $showingAddCommand) {
             AddCommandSheet(
@@ -77,6 +110,14 @@ struct FolderDetailView: View {
         let resolvedCmd = command.resolve(placeholders: params)
         
         Task {
+            // Start accessing security-scoped resource
+            let accessGranted = folder.startAccessingSecurityScopedResource()
+            defer {
+                if accessGranted {
+                    folder.stopAccessingSecurityScopedResource()
+                }
+            }
+            
             let executor = CommandExecutor(shellPath: folder.shellPath, workingDirectory: folder.path)
             let result = await executor.execute(command: resolvedCmd)
             
@@ -96,7 +137,14 @@ struct FolderDetailView: View {
     
     private func addCommand() {
         let command = Command(name: newCommandName, cmd: newCommandCmd)
-        folder.commands.append(command)
+        
+        // Create a new folder with the updated commands array
+        var updatedFolder = folder
+        updatedFolder.commands.append(command)
+        
+        // Assign the updated folder back to trigger the binding setter
+        folder = updatedFolder
+        
         newCommandName = ""
         newCommandCmd = ""
         showingAddCommand = false

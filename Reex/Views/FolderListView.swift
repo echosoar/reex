@@ -6,6 +6,7 @@ struct FolderListView: View {
     @State private var showingAddFolder = false
     @State private var newFolderName = ""
     @State private var newFolderPath = ""
+    @State private var newFolderURL: URL?
     
     var body: some View {
         NavigationSplitView {
@@ -31,6 +32,11 @@ struct FolderListView: View {
                                     .foregroundColor(.secondary)
                             }
                         }
+                        .contextMenu {
+                            Button("Delete", role: .destructive) {
+                                deleteFolder(folder)
+                            }
+                        }
                     }
                     .onDelete(perform: deleteFolders)
                 }
@@ -48,8 +54,18 @@ struct FolderListView: View {
             AddFolderSheet(
                 folderName: $newFolderName,
                 folderPath: $newFolderPath,
-                onAdd: addFolder
+                folderURL: $newFolderURL,
+                onAdd: {
+                    addFolder(url: newFolderURL)
+                }
             )
+        }
+        .onChange(of: folders) { newFolders in
+            // Update selectedFolder if it exists in the new folders array
+            if let selectedFolder = selectedFolder,
+               let updatedFolder = newFolders.first(where: { $0.id == selectedFolder.id }) {
+                self.selectedFolder = updatedFolder
+            }
         }
         .onAppear(perform: loadFolders)
     }
@@ -59,23 +75,80 @@ struct FolderListView: View {
             return .constant(folder)
         }
         return Binding(
-            get: { folders[index] },
-            set: { folders[index] = $0; saveFolders() }
+            get: { 
+                return self.folders[index] 
+            },
+            set: { newValue in
+                self.folders[index] = newValue
+                self.saveFolders()
+                
+                // Force SwiftUI to detect the change by updating the entire array
+                let updatedFolders = self.folders
+                self.folders = updatedFolders
+            }
         )
     }
     
-    private func addFolder() {
-        let folder = Folder(name: newFolderName, path: newFolderPath)
+    private func addFolder(url: URL?) {
+        var bookmarkData: Data?
+        if let url = url {
+            do {
+                bookmarkData = try url.bookmarkData(options: .withSecurityScope,
+                                                   includingResourceValuesForKeys: nil,
+                                                   relativeTo: nil)
+            } catch {
+                print("Failed to create bookmark: \(error)")
+            }
+        }
+        
+        let folder = Folder(name: newFolderName, path: newFolderPath, bookmarkData: bookmarkData)
         folders.append(folder)
         saveFolders()
         newFolderName = ""
         newFolderPath = ""
+        newFolderURL = nil
         showingAddFolder = false
     }
     
+    private func executionRecordsKey(for folder: Folder) -> String {
+        return "records_\(folder.id.uuidString)"
+    }
+    
+    private func deleteFolder(_ folder: Folder) {
+        // Remove execution records from UserDefaults
+        UserDefaults.standard.removeObject(forKey: executionRecordsKey(for: folder))
+        
+        // Remove the folder
+        if let index = folders.firstIndex(where: { $0.id == folder.id }) {
+            folders.remove(at: index)
+            saveFolders()
+            
+            // Clear selection if the deleted folder was selected
+            if selectedFolder?.id == folder.id {
+                selectedFolder = nil
+            }
+        }
+    }
+    
     private func deleteFolders(at offsets: IndexSet) {
+        // Check if selected folder will be deleted
+        let willDeleteSelected = offsets.contains(where: { index in
+            folders[index].id == selectedFolder?.id
+        })
+        
+        // Remove execution records for each folder being deleted
+        for index in offsets {
+            let folder = folders[index]
+            UserDefaults.standard.removeObject(forKey: executionRecordsKey(for: folder))
+        }
+        
         folders.remove(atOffsets: offsets)
         saveFolders()
+        
+        // Clear selection if the deleted folder was selected
+        if willDeleteSelected {
+            selectedFolder = nil
+        }
     }
     
     private func loadFolders() {
@@ -95,6 +168,7 @@ struct FolderListView: View {
 struct AddFolderSheet: View {
     @Binding var folderName: String
     @Binding var folderPath: String
+    @Binding var folderURL: URL?
     let onAdd: () -> Void
     @Environment(\.dismiss) private var dismiss
     
@@ -109,6 +183,7 @@ struct AddFolderSheet: View {
             HStack {
                 TextField("Folder Path", text: $folderPath)
                     .textFieldStyle(.roundedBorder)
+                    .disabled(true)
                 
                 Button("Choose...") {
                     let panel = NSOpenPanel()
@@ -116,6 +191,7 @@ struct AddFolderSheet: View {
                     panel.canChooseDirectories = true
                     panel.allowsMultipleSelection = false
                     if panel.runModal() == .OK, let url = panel.url {
+                        folderURL = url
                         folderPath = url.path
                         if folderName.isEmpty {
                             folderName = url.lastPathComponent
