@@ -14,6 +14,12 @@ struct ExecutionRecordRow: View {
                         .font(.subheadline)
                         .fontWeight(.medium)
                     
+                    if record.isRemote {
+                        Image(systemName: "cloud")
+                            .foregroundColor(.blue)
+                            .help("Remote command")
+                    }
+                    
                     Spacer()
                     
                     if record.exitCode == 0 {
@@ -83,6 +89,12 @@ struct ExecutionRecordView: View {
                                 Text(record.commandName)
                                     .font(.subheadline)
                                     .fontWeight(.medium)
+                                
+                                if record.isRemote {
+                                    Image(systemName: "cloud")
+                                        .foregroundColor(.blue)
+                                        .help("Remote command")
+                                }
                                 
                                 Spacer()
                                 
@@ -154,6 +166,13 @@ struct RecordDetailView: View {
                 LabeledContent("Command Name", value: record.commandName)
                 LabeledContent("Exit Code", value: "\(record.exitCode)")
                 LabeledContent("Timestamp", value: formatDate(record.timestamp))
+                
+                if record.isRemote {
+                    LabeledContent("Source", value: "Remote Command")
+                    if let remoteId = record.remoteCommandId {
+                        LabeledContent("Remote ID", value: "\(remoteId)")
+                    }
+                }
                 
                 VStack(alignment: .leading) {
                     Text("Command:")

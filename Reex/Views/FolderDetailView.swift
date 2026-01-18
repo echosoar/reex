@@ -6,6 +6,7 @@ struct FolderDetailView: View {
     @State private var showingAddCommand = false
     @State private var newCommandName = ""
     @State private var newCommandCmd = ""
+    @StateObject private var remoteCommandService = RemoteCommandService()
     
     var body: some View {
         ScrollView {
@@ -78,6 +79,29 @@ struct FolderDetailView: View {
                         .font(.headline)
                         .padding(.horizontal)
                     
+                    // Remote command URL input field
+                    VStack(alignment: .leading, spacing: 4) {
+                        TextField("Remote Command URL (optional)", text: Binding(
+                            get: { folder.remoteCommandUrl ?? "" },
+                            set: { newValue in
+                                var updatedFolder = folder
+                                updatedFolder.remoteCommandUrl = newValue.isEmpty ? nil : newValue
+                                folder = updatedFolder
+                                
+                                // Restart polling with the new URL
+                                restartPolling()
+                            }
+                        ))
+                        .textFieldStyle(.roundedBorder)
+                        .padding(.horizontal)
+                        
+                        Text("Commands will be fetched from this URL every minute")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .padding(.horizontal)
+                    }
+                    .padding(.bottom, 8)
+                    
                     if executionRecords.isEmpty {
                         Text("No execution records yet")
                             .foregroundColor(.secondary)
@@ -103,7 +127,13 @@ struct FolderDetailView: View {
                 onAdd: addCommand
             )
         }
-        .onAppear(perform: loadRecords)
+        .onAppear {
+            loadRecords()
+            restartPolling()
+        }
+        .onDisappear {
+            remoteCommandService.stopPolling()
+        }
     }
     
     private func executeCommand(command: Command, params: [String: String]) {
@@ -160,6 +190,14 @@ struct FolderDetailView: View {
     private func saveRecords() {
         if let encoded = try? JSONEncoder().encode(executionRecords) {
             UserDefaults.standard.set(encoded, forKey: "records_\(folder.id.uuidString)")
+        }
+    }
+    
+    private func restartPolling() {
+        remoteCommandService.stopPolling()
+        remoteCommandService.startPolling(for: folder, executionRecords: executionRecords) { [self] record in
+            executionRecords.insert(record, at: 0)
+            saveRecords()
         }
     }
 }
