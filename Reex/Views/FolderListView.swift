@@ -78,9 +78,13 @@ struct FolderListView: View {
         showingAddFolder = false
     }
     
+    private func executionRecordsKey(for folder: Folder) -> String {
+        return "records_\(folder.id.uuidString)"
+    }
+    
     private func deleteFolder(_ folder: Folder) {
         // Remove execution records from UserDefaults
-        UserDefaults.standard.removeObject(forKey: "records_\(folder.id.uuidString)")
+        UserDefaults.standard.removeObject(forKey: executionRecordsKey(for: folder))
         
         // Remove the folder
         if let index = folders.firstIndex(where: { $0.id == folder.id }) {
@@ -95,19 +99,24 @@ struct FolderListView: View {
     }
     
     private func deleteFolders(at offsets: IndexSet) {
+        // Check if selected folder will be deleted
+        let willDeleteSelected = offsets.contains(where: { index in
+            folders[index].id == selectedFolder?.id
+        })
+        
         // Remove execution records for each folder being deleted
         for index in offsets {
             let folder = folders[index]
-            UserDefaults.standard.removeObject(forKey: "records_\(folder.id.uuidString)")
-            
-            // Clear selection if the deleted folder was selected
-            if selectedFolder?.id == folder.id {
-                selectedFolder = nil
-            }
+            UserDefaults.standard.removeObject(forKey: executionRecordsKey(for: folder))
         }
         
         folders.remove(atOffsets: offsets)
         saveFolders()
+        
+        // Clear selection if the deleted folder was selected
+        if willDeleteSelected {
+            selectedFolder = nil
+        }
     }
     
     private func loadFolders() {
