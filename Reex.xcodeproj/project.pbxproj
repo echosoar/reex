@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 54;
+	objectVersion = 55;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -16,6 +16,7 @@
 		2A1E8CAB2C0A000000000007 /* ExecutionRecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1E8CAA2C0A000000000007 /* ExecutionRecordView.swift */; };
 		2A1E8CAD2C0A000000000008 /* CommandExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1E8CAC2C0A000000000008 /* CommandExecutor.swift */; };
 		2A1E8CAF2C0A000000000009 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2A1E8CAE2C0A000000000009 /* Assets.xcassets */; };
+		5B23D2A42F1CE09900BC95A3 /* RemoteCommandService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B23D2A32F1CE09900BC95A3 /* RemoteCommandService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 		2A1E8CAC2C0A000000000008 /* CommandExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandExecutor.swift; sourceTree = "<group>"; };
 		2A1E8CAE2C0A000000000009 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2A1E8CB02C0A00000000000A /* Reex.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Reex.entitlements; sourceTree = "<group>"; };
+		5B23D2A32F1CE09900BC95A3 /* RemoteCommandService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteCommandService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -87,6 +89,7 @@
 		2A1E8CB22C0A00000000000C /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				5B23D2A32F1CE09900BC95A3 /* RemoteCommandService.swift */,
 				2A1E8CAC2C0A000000000008 /* CommandExecutor.swift */,
 			);
 			path = Services;
@@ -166,6 +169,7 @@
 				2A1E8CA32C0A000000000003 /* Models.swift in Sources */,
 				2A1E8CA52C0A000000000004 /* FolderListView.swift in Sources */,
 				2A1E8CA72C0A000000000005 /* FolderDetailView.swift in Sources */,
+				5B23D2A42F1CE09900BC95A3 /* RemoteCommandService.swift in Sources */,
 				2A1E8CA92C0A000000000006 /* CommandRowView.swift in Sources */,
 				2A1E8CAB2C0A000000000007 /* ExecutionRecordView.swift in Sources */,
 				2A1E8CAD2C0A000000000008 /* CommandExecutor.swift in Sources */,

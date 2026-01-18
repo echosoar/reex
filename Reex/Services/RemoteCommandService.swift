@@ -45,6 +45,8 @@ class RemoteCommandService: ObservableObject {
         Task {
             do {
                 let (data, _) = try await URLSession.shared.data(from: url)
+                print("Fetched remote commands: \(String(data: data, encoding: .utf8) ?? "")")
+                print("Executed remote IDs: \(executedRemoteIds)")
                 let response = try JSONDecoder().decode(RemoteCommandResponse.self, from: data)
                 
                 // Process only the first command in the list if it hasn't been executed

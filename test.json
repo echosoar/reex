@@ -1,0 +1,11 @@
+{
+    "list": [
+        {
+            "id": 123456,
+            "commandName": "ls",
+            "arguments": {
+                "params": "-al"
+            }
+        }
+    ]
+}
