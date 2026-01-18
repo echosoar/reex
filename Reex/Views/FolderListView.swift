@@ -99,6 +99,11 @@ struct FolderListView: View {
         for index in offsets {
             let folder = folders[index]
             UserDefaults.standard.removeObject(forKey: "records_\(folder.id.uuidString)")
+            
+            // Clear selection if the deleted folder was selected
+            if selectedFolder?.id == folder.id {
+                selectedFolder = nil
+            }
         }
         
         folders.remove(atOffsets: offsets)
