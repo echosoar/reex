@@ -53,7 +53,7 @@ class RemoteCommandService: ObservableObject {
                     await executeRemoteCommand(remoteCommand, for: folder, onCommandExecuted: onCommandExecuted)
                 }
             } catch {
-                print("Failed to fetch or parse remote commands: \(error)")
+                NSLog("Failed to fetch or parse remote commands: \(error.localizedDescription)")
             }
         }
     }
@@ -61,7 +61,7 @@ class RemoteCommandService: ObservableObject {
     private func executeRemoteCommand(_ remoteCommand: RemoteCommand, for folder: Folder, onCommandExecuted: @escaping (ExecutionRecord) -> Void) async {
         // Find matching command by name
         guard let command = folder.commands.first(where: { $0.name == remoteCommand.commandName }) else {
-            print("Command not found: \(remoteCommand.commandName)")
+            NSLog("Command not found: \(remoteCommand.commandName)")
             return
         }
         
@@ -94,8 +94,6 @@ class RemoteCommandService: ObservableObject {
         executedRemoteIds.insert(remoteCommand.id)
         
         // Notify about the execution
-        await MainActor.run {
-            onCommandExecuted(record)
-        }
+        onCommandExecuted(record)
     }
 }

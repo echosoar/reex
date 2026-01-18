@@ -195,7 +195,7 @@ struct FolderDetailView: View {
     
     private func restartPolling() {
         remoteCommandService.stopPolling()
-        remoteCommandService.startPolling(for: folder, executionRecords: executionRecords) { [self] record in
+        remoteCommandService.startPolling(for: folder, executionRecords: executionRecords) { record in
             executionRecords.insert(record, at: 0)
             saveRecords()
         }
