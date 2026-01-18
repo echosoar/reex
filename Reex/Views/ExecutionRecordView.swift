@@ -1,5 +1,63 @@
 import SwiftUI
 
+struct ExecutionRecordRow: View {
+    let record: ExecutionRecord
+    @State private var showingDetail = false
+    
+    var body: some View {
+        Button(action: {
+            showingDetail = true
+        }) {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack {
+                    Text(record.commandName)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                    
+                    Spacer()
+                    
+                    if record.exitCode == 0 {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                    } else {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(.red)
+                    }
+                    
+                    Text(formatDate(record.timestamp))
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+                
+                Text(record.command)
+                    .font(.system(.caption, design: .monospaced))
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+            }
+            .padding()
+            .background(Color.gray.opacity(0.1))
+            .cornerRadius(8)
+        }
+        .buttonStyle(.plain)
+        .contextMenu {
+            Button("Copy Output") {
+                NSPasteboard.general.clearContents()
+                NSPasteboard.general.setString(record.output, forType: .string)
+            }
+        }
+        .sheet(isPresented: $showingDetail) {
+            RecordDetailView(record: record)
+        }
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .medium
+        return formatter.string(from: date)
+    }
+}
+
 struct ExecutionRecordView: View {
     @Binding var records: [ExecutionRecord]
     @State private var selectedRecord: ExecutionRecord?
