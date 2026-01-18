@@ -96,7 +96,9 @@ struct FolderDetailView: View {
     
     private func addCommand() {
         let command = Command(name: newCommandName, cmd: newCommandCmd)
-        folder.commands.append(command)
+        var updatedFolder = folder
+        updatedFolder.commands.append(command)
+        folder = updatedFolder
         newCommandName = ""
         newCommandCmd = ""
         showingAddCommand = false

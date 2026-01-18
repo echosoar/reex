@@ -31,6 +31,11 @@ struct FolderListView: View {
                                     .foregroundColor(.secondary)
                             }
                         }
+                        .contextMenu {
+                            Button("Delete", role: .destructive) {
+                                deleteFolder(folder)
+                            }
+                        }
                     }
                     .onDelete(perform: deleteFolders)
                 }
@@ -73,7 +78,29 @@ struct FolderListView: View {
         showingAddFolder = false
     }
     
+    private func deleteFolder(_ folder: Folder) {
+        // Remove execution records from UserDefaults
+        UserDefaults.standard.removeObject(forKey: "records_\(folder.id.uuidString)")
+        
+        // Remove the folder
+        if let index = folders.firstIndex(where: { $0.id == folder.id }) {
+            folders.remove(at: index)
+            saveFolders()
+            
+            // Clear selection if the deleted folder was selected
+            if selectedFolder?.id == folder.id {
+                selectedFolder = nil
+            }
+        }
+    }
+    
     private func deleteFolders(at offsets: IndexSet) {
+        // Remove execution records for each folder being deleted
+        for index in offsets {
+            let folder = folders[index]
+            UserDefaults.standard.removeObject(forKey: "records_\(folder.id.uuidString)")
+        }
+        
         folders.remove(atOffsets: offsets)
         saveFolders()
     }
