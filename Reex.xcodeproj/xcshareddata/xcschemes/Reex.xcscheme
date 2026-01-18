@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "A100000100000000000000F"
+               BlueprintIdentifier = "2A1E8C9A2C08000000000002"
                BuildableName = "Reex.app"
                BlueprintName = "Reex"
                ReferencedContainer = "container:Reex.xcodeproj">
@@ -43,7 +43,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "A100000100000000000000F"
+            BlueprintIdentifier = "2A1E8C9A2C08000000000002"
             BuildableName = "Reex.app"
             BlueprintName = "Reex"
             ReferencedContainer = "container:Reex.xcodeproj">
@@ -60,7 +60,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "A100000100000000000000F"
+            BlueprintIdentifier = "2A1E8C9A2C08000000000002"
             BuildableName = "Reex.app"
             BlueprintName = "Reex"
             ReferencedContainer = "container:Reex.xcodeproj">

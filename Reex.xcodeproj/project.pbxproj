@@ -3,37 +3,37 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
-		A1000001000000000000001 /* ReexApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001000000000000011 /* ReexApp.swift */; };
-		A1000001000000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001000000000000012 /* ContentView.swift */; };
-		A1000001000000000000003 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001000000000000013 /* Models.swift */; };
-		A1000001000000000000004 /* FolderListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001000000000000014 /* FolderListView.swift */; };
-		A1000001000000000000005 /* FolderDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001000000000000015 /* FolderDetailView.swift */; };
-		A1000001000000000000006 /* CommandRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001000000000000016 /* CommandRowView.swift */; };
-		A1000001000000000000007 /* ExecutionRecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001000000000000017 /* ExecutionRecordView.swift */; };
-		A1000001000000000000008 /* CommandExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000001000000000000018 /* CommandExecutor.swift */; };
-		A100000100000000000000A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A100000100000000000001A /* Assets.xcassets */; };
+		2A1E8C9F2C0A000000000001 /* ReexApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1E8C9E2C0A000000000001 /* ReexApp.swift */; };
+		2A1E8CA12C0A000000000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1E8CA02C0A000000000002 /* ContentView.swift */; };
+		2A1E8CA32C0A000000000003 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1E8CA22C0A000000000003 /* Models.swift */; };
+		2A1E8CA52C0A000000000004 /* FolderListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1E8CA42C0A000000000004 /* FolderListView.swift */; };
+		2A1E8CA72C0A000000000005 /* FolderDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1E8CA62C0A000000000005 /* FolderDetailView.swift */; };
+		2A1E8CA92C0A000000000006 /* CommandRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1E8CA82C0A000000000006 /* CommandRowView.swift */; };
+		2A1E8CAB2C0A000000000007 /* ExecutionRecordView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1E8CAA2C0A000000000007 /* ExecutionRecordView.swift */; };
+		2A1E8CAD2C0A000000000008 /* CommandExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1E8CAC2C0A000000000008 /* CommandExecutor.swift */; };
+		2A1E8CAF2C0A000000000009 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2A1E8CAE2C0A000000000009 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		A1000001000000000000010 /* Reex.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Reex.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		A1000001000000000000011 /* ReexApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReexApp.swift; sourceTree = "<group>"; };
-		A1000001000000000000012 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		A1000001000000000000013 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
-		A1000001000000000000014 /* FolderListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderListView.swift; sourceTree = "<group>"; };
-		A1000001000000000000015 /* FolderDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderDetailView.swift; sourceTree = "<group>"; };
-		A1000001000000000000016 /* CommandRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandRowView.swift; sourceTree = "<group>"; };
-		A1000001000000000000017 /* ExecutionRecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionRecordView.swift; sourceTree = "<group>"; };
-		A1000001000000000000018 /* CommandExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandExecutor.swift; sourceTree = "<group>"; };
-		A100000100000000000001A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		A100000100000000000001B /* Reex.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Reex.entitlements; sourceTree = "<group>"; };
+		2A1E8C9B2C09000000000001 /* Reex.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Reex.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		2A1E8C9E2C0A000000000001 /* ReexApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReexApp.swift; sourceTree = "<group>"; };
+		2A1E8CA02C0A000000000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		2A1E8CA22C0A000000000003 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		2A1E8CA42C0A000000000004 /* FolderListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderListView.swift; sourceTree = "<group>"; };
+		2A1E8CA62C0A000000000005 /* FolderDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FolderDetailView.swift; sourceTree = "<group>"; };
+		2A1E8CA82C0A000000000006 /* CommandRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandRowView.swift; sourceTree = "<group>"; };
+		2A1E8CAA2C0A000000000007 /* ExecutionRecordView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExecutionRecordView.swift; sourceTree = "<group>"; };
+		2A1E8CAC2C0A000000000008 /* CommandExecutor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandExecutor.swift; sourceTree = "<group>"; };
+		2A1E8CAE2C0A000000000009 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		2A1E8CB02C0A00000000000A /* Reex.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Reex.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		A100000100000000000000D /* Frameworks */ = {
+		2A1E8C982C08000000000001 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -43,51 +43,51 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		A1000001000000000000007 = {
+		2A1E8C922C07000000000001 = {
 			isa = PBXGroup;
 			children = (
-				A1000001000000000000020 /* Reex */,
-				A1000001000000000000021 /* Products */,
+				2A1E8C9D2C09000000000002 /* Reex */,
+				2A1E8C9C2C09000000000003 /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		A1000001000000000000020 /* Reex */ = {
+		2A1E8C9C2C09000000000003 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				A1000001000000000000011 /* ReexApp.swift */,
-				A1000001000000000000012 /* ContentView.swift */,
-				A1000001000000000000013 /* Models.swift */,
-				A1000001000000000000030 /* Views */,
-				A1000001000000000000031 /* Services */,
-				A100000100000000000001A /* Assets.xcassets */,
-				A100000100000000000001B /* Reex.entitlements */,
-			);
-			path = Reex;
-			sourceTree = "<group>";
-		};
-		A1000001000000000000021 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				A1000001000000000000010 /* Reex.app */,
+				2A1E8C9B2C09000000000001 /* Reex.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		A1000001000000000000030 /* Views */ = {
+		2A1E8C9D2C09000000000002 /* Reex */ = {
 			isa = PBXGroup;
 			children = (
-				A1000001000000000000014 /* FolderListView.swift */,
-				A1000001000000000000015 /* FolderDetailView.swift */,
-				A1000001000000000000016 /* CommandRowView.swift */,
-				A1000001000000000000017 /* ExecutionRecordView.swift */,
+				2A1E8C9E2C0A000000000001 /* ReexApp.swift */,
+				2A1E8CA02C0A000000000002 /* ContentView.swift */,
+				2A1E8CA22C0A000000000003 /* Models.swift */,
+				2A1E8CB12C0A00000000000B /* Views */,
+				2A1E8CB22C0A00000000000C /* Services */,
+				2A1E8CAE2C0A000000000009 /* Assets.xcassets */,
+				2A1E8CB02C0A00000000000A /* Reex.entitlements */,
+			);
+			path = Reex;
+			sourceTree = "<group>";
+		};
+		2A1E8CB12C0A00000000000B /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				2A1E8CA42C0A000000000004 /* FolderListView.swift */,
+				2A1E8CA62C0A000000000005 /* FolderDetailView.swift */,
+				2A1E8CA82C0A000000000006 /* CommandRowView.swift */,
+				2A1E8CAA2C0A000000000007 /* ExecutionRecordView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
 		};
-		A1000001000000000000031 /* Services */ = {
+		2A1E8CB22C0A00000000000C /* Services */ = {
 			isa = PBXGroup;
 			children = (
-				A1000001000000000000018 /* CommandExecutor.swift */,
+				2A1E8CAC2C0A000000000008 /* CommandExecutor.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -95,13 +95,13 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		A100000100000000000000F /* Reex */ = {
+		2A1E8C9A2C08000000000002 /* Reex */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = A1000001000000000000022 /* Build configuration list for PBXNativeTarget "Reex" */;
+			buildConfigurationList = 2A1E8CB32C0A00000000000D /* Build configuration list for PBXNativeTarget "Reex" */;
 			buildPhases = (
-				A100000100000000000000C /* Sources */,
-				A100000100000000000000D /* Frameworks */,
-				A100000100000000000000E /* Resources */,
+				2A1E8C972C08000000000003 /* Sources */,
+				2A1E8C982C08000000000001 /* Frameworks */,
+				2A1E8C992C08000000000004 /* Resources */,
 			);
 			buildRules = (
 			);
@@ -109,73 +109,73 @@
 			);
 			name = Reex;
 			productName = Reex;
-			productReference = A1000001000000000000010 /* Reex.app */;
+			productReference = 2A1E8C9B2C09000000000001 /* Reex.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
-		A1000001000000000000008 /* Project object */ = {
+		2A1E8C932C07000000000002 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1500;
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
-					A100000100000000000000F = {
+					2A1E8C9A2C08000000000002 = {
 						CreatedOnToolsVersion = 15.0;
 					};
 				};
 			};
-			buildConfigurationList = A100000100000000000000B /* Build configuration list for PBXProject "Reex" */;
-			compatibilityVersion = "Xcode 14.0";
+			buildConfigurationList = 2A1E8C962C07000000000003 /* Build configuration list for PBXProject "Reex" */;
+			compatibilityVersion = "Xcode 13.0";
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
 				Base,
 			);
-			mainGroup = A1000001000000000000007;
-			productRefGroup = A1000001000000000000021 /* Products */;
+			mainGroup = 2A1E8C922C07000000000001;
+			productRefGroup = 2A1E8C9C2C09000000000003 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				A100000100000000000000F /* Reex */,
+				2A1E8C9A2C08000000000002 /* Reex */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		A100000100000000000000E /* Resources */ = {
+		2A1E8C992C08000000000004 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A100000100000000000000A /* Assets.xcassets in Resources */,
+				2A1E8CAF2C0A000000000009 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		A100000100000000000000C /* Sources */ = {
+		2A1E8C972C08000000000003 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A1000001000000000000001 /* ReexApp.swift in Sources */,
-				A1000001000000000000002 /* ContentView.swift in Sources */,
-				A1000001000000000000003 /* Models.swift in Sources */,
-				A1000001000000000000004 /* FolderListView.swift in Sources */,
-				A1000001000000000000005 /* FolderDetailView.swift in Sources */,
-				A1000001000000000000006 /* CommandRowView.swift in Sources */,
-				A1000001000000000000007 /* ExecutionRecordView.swift in Sources */,
-				A1000001000000000000008 /* CommandExecutor.swift in Sources */,
+				2A1E8C9F2C0A000000000001 /* ReexApp.swift in Sources */,
+				2A1E8CA12C0A000000000002 /* ContentView.swift in Sources */,
+				2A1E8CA32C0A000000000003 /* Models.swift in Sources */,
+				2A1E8CA52C0A000000000004 /* FolderListView.swift in Sources */,
+				2A1E8CA72C0A000000000005 /* FolderDetailView.swift in Sources */,
+				2A1E8CA92C0A000000000006 /* CommandRowView.swift in Sources */,
+				2A1E8CAB2C0A000000000007 /* ExecutionRecordView.swift in Sources */,
+				2A1E8CAD2C0A000000000008 /* CommandExecutor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		A1000001000000000000023 /* Debug */ = {
+		2A1E8CB42C0A00000000000E /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -238,7 +238,7 @@
 			};
 			name = Debug;
 		};
-		A1000001000000000000024 /* Release */ = {
+		2A1E8CB52C0A00000000000F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -293,7 +293,7 @@
 			};
 			name = Release;
 		};
-		A1000001000000000000025 /* Debug */ = {
+		2A1E8CB72C0A000000000010 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -318,7 +318,7 @@
 			};
 			name = Debug;
 		};
-		A1000001000000000000026 /* Release */ = {
+		2A1E8CB82C0A000000000011 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -346,25 +346,25 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		A100000100000000000000B /* Build configuration list for PBXProject "Reex" */ = {
+		2A1E8C962C07000000000003 /* Build configuration list for PBXProject "Reex" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				A1000001000000000000023 /* Debug */,
-				A1000001000000000000024 /* Release */,
+				2A1E8CB42C0A00000000000E /* Debug */,
+				2A1E8CB52C0A00000000000F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		A1000001000000000000022 /* Build configuration list for PBXNativeTarget "Reex" */ = {
+		2A1E8CB32C0A00000000000D /* Build configuration list for PBXNativeTarget "Reex" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				A1000001000000000000025 /* Debug */,
-				A1000001000000000000026 /* Release */,
+				2A1E8CB72C0A000000000010 /* Debug */,
+				2A1E8CB82C0A000000000011 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
-	rootObject = A1000001000000000000008 /* Project object */;
+	rootObject = 2A1E8C932C07000000000002 /* Project object */;
 }
