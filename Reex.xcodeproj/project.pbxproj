@@ -17,6 +17,7 @@
 		2A1E8CAD2C0A000000000008 /* CommandExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2A1E8CAC2C0A000000000008 /* CommandExecutor.swift */; };
 		2A1E8CAF2C0A000000000009 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2A1E8CAE2C0A000000000009 /* Assets.xcassets */; };
 		5B23D2A42F1CE09900BC95A3 /* RemoteCommandService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B23D2A32F1CE09900BC95A3 /* RemoteCommandService.swift */; };
+		5B23D2A62F1D10B400BC95A3 /* NotificationNames.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B23D2A52F1D10B400BC95A3 /* NotificationNames.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 		2A1E8CAE2C0A000000000009 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2A1E8CB02C0A00000000000A /* Reex.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Reex.entitlements; sourceTree = "<group>"; };
 		5B23D2A32F1CE09900BC95A3 /* RemoteCommandService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteCommandService.swift; sourceTree = "<group>"; };
+		5B23D2A52F1D10B400BC95A3 /* NotificationNames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationNames.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,6 +91,7 @@
 		2A1E8CB22C0A00000000000C /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				5B23D2A52F1D10B400BC95A3 /* NotificationNames.swift */,
 				5B23D2A32F1CE09900BC95A3 /* RemoteCommandService.swift */,
 				2A1E8CAC2C0A000000000008 /* CommandExecutor.swift */,
 			);
@@ -171,6 +174,7 @@
 				2A1E8CA72C0A000000000005 /* FolderDetailView.swift in Sources */,
 				5B23D2A42F1CE09900BC95A3 /* RemoteCommandService.swift in Sources */,
 				2A1E8CA92C0A000000000006 /* CommandRowView.swift in Sources */,
+				5B23D2A62F1D10B400BC95A3 /* NotificationNames.swift in Sources */,
 				2A1E8CAB2C0A000000000007 /* ExecutionRecordView.swift in Sources */,
 				2A1E8CAD2C0A000000000008 /* CommandExecutor.swift in Sources */,
 			);

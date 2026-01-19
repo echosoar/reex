@@ -7,6 +7,7 @@ struct FolderListView: View {
     @State private var newFolderName = ""
     @State private var newFolderPath = ""
     @State private var newFolderURL: URL?
+    @State private var pollingTask: Task<Void, Never>?
     
     var body: some View {
         NavigationSplitView {
@@ -67,7 +68,13 @@ struct FolderListView: View {
                 self.selectedFolder = updatedFolder
             }
         }
-        .onAppear(perform: loadFolders)
+        .onAppear {
+            loadFolders()
+            startPollingRemoteConfigs()
+        }
+        .onDisappear {
+            stopPollingRemoteConfigs()
+        }
     }
     
     private func binding(for folder: Folder) -> Binding<Folder> {
@@ -161,6 +168,112 @@ struct FolderListView: View {
     private func saveFolders() {
         if let encoded = try? JSONEncoder().encode(folders) {
             UserDefaults.standard.set(encoded, forKey: "folders")
+        }
+    }
+
+    // MARK: - Remote config polling (global)
+    private func startPollingRemoteConfigs() {
+        stopPollingRemoteConfigs()
+        pollingTask = Task {
+            while !Task.isCancelled {
+                await pollOnce()
+                try? await Task.sleep(nanoseconds: 60 * 1_000_000_000) // 60s
+            }
+        }
+    }
+
+    private func stopPollingRemoteConfigs() {
+        pollingTask?.cancel()
+        pollingTask = nil
+    }
+
+    private func pollOnce() async {
+        // Snapshot folders on main actor to avoid races
+        let foldersSnapshot = await MainActor.run { self.folders }
+
+        print("Polling remote commands for folders...")
+
+        for folder in foldersSnapshot {
+            print("Polling folder: \(folder.name), url: \(folder.remoteCommandUrl ?? "nil")")
+            guard let urlString = folder.remoteCommandUrl, !urlString.isEmpty, let url = URL(string: urlString) else {
+                continue
+            }
+
+            do {
+                let (data, _) = try await URLSession.shared.data(from: url)
+                print("Fetched remote url: \(urlString), data: \(String(data: data, encoding: .utf8) ?? "")")
+                struct RemoteItem: Codable { let id: Int; let commandName: String; let arguments: [String: String]?; let callback: String? }
+                struct RemoteResponse: Codable { let list: [RemoteItem] }
+
+                let decoded = try JSONDecoder().decode(RemoteResponse.self, from: data)
+                guard let first = decoded.list.first else { continue }
+
+                // Check if already executed
+                let executedKey = "remote_executed_\(folder.id.uuidString)"
+                var executed = UserDefaults.standard.array(forKey: executedKey) as? [Int] ?? []
+                if executed.contains(first.id) { continue }
+
+                    if let cmd = folder.commands.first(where: { $0.name == first.commandName }) {
+                    let params = first.arguments ?? [:]
+
+                    // Start security scope if needed
+                    let accessGranted = folder.startAccessingSecurityScopedResource()
+                    defer {
+                        if accessGranted { folder.stopAccessingSecurityScopedResource() }
+                    }
+
+                    let executor = CommandExecutor(shellPath: folder.shellPath, workingDirectory: folder.path)
+                    var resultOutput = ""
+                    var resultExit: Int32 = 0
+                    do {
+                        let result = await executor.execute(command: cmd.resolve(placeholders: params))
+                        resultOutput = result.output
+                        resultExit = result.exitCode
+                    } catch {
+                        resultOutput = "Execution failed: \(error.localizedDescription)"
+                        resultExit = -1
+                    }
+
+                    // Save record
+                    let key = executionRecordsKey(for: folder)
+                    var records: [ExecutionRecord] = []
+                    if let d = UserDefaults.standard.data(forKey: key), let dec = try? JSONDecoder().decode([ExecutionRecord].self, from: d) {
+                        records = dec
+                    }
+                    let record = ExecutionRecord(commandName: cmd.name, command: cmd.resolve(placeholders: params), output: resultOutput, exitCode: resultExit, remoteCommandId: first.id, isRemote: true)
+                    records.insert(record, at: 0)
+                    if let enc = try? JSONEncoder().encode(records) {
+                        UserDefaults.standard.set(enc, forKey: key)
+                    }
+
+                    // Mark executed
+                    executed.append(first.id)
+                    UserDefaults.standard.set(executed, forKey: executedKey)
+
+                    // Notify listeners to reload
+                    NotificationCenter.default.post(name: Notification.Name("executionRecordsUpdated"), object: folder.id.uuidString)
+                    // If callback provided, POST output
+                    if let cb = first.callback, let cbUrl = URL(string: cb) {
+                        Task {
+                            var request = URLRequest(url: cbUrl)
+                            request.httpMethod = "POST"
+                            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                            let body = ["output": resultOutput]
+                            if let bodyData = try? JSONEncoder().encode(body) {
+                                do {
+                                    request.httpBody = bodyData
+                                    let (_, _) = try await URLSession.shared.data(for: request)
+                                } catch {
+                                    print("Failed to POST callback: \(error)")
+                                }
+                            }
+                        }
+                    }
+                }
+            } catch {
+                // ignore network/parse errors for now
+                continue
+            }
         }
     }
 }

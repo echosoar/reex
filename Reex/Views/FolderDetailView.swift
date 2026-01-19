@@ -6,7 +6,7 @@ struct FolderDetailView: View {
     @State private var showingAddCommand = false
     @State private var newCommandName = ""
     @State private var newCommandCmd = ""
-    @StateObject private var remoteCommandService = RemoteCommandService()
+    // Remote polling is handled centrally in FolderListView
     
     var body: some View {
         ScrollView {
@@ -87,9 +87,6 @@ struct FolderDetailView: View {
                                 var updatedFolder = folder
                                 updatedFolder.remoteCommandUrl = newValue.isEmpty ? nil : newValue
                                 folder = updatedFolder
-                                
-                                // Restart polling with the new URL
-                                restartPolling()
                             }
                         ))
                         .textFieldStyle(.roundedBorder)
@@ -129,10 +126,18 @@ struct FolderDetailView: View {
         }
         .onAppear {
             loadRecords()
-            restartPolling()
         }
         .onDisappear {
-            remoteCommandService.stopPolling()
+        }
+        .onChange(of: folder.id) { _ in
+            // When the selected folder changes, reload its records
+            loadRecords()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("executionRecordsUpdated"))) { notification in
+            // If a remote execution updated records for this folder, reload
+            if let idStr = notification.object as? String, idStr == folder.id.uuidString {
+                loadRecords()
+            }
         }
     }
     
@@ -193,13 +198,7 @@ struct FolderDetailView: View {
         }
     }
     
-    private func restartPolling() {
-        remoteCommandService.stopPolling()
-        remoteCommandService.startPolling(for: folder, executionRecords: executionRecords) { record in
-            executionRecords.insert(record, at: 0)
-            saveRecords()
-        }
-    }
+    // Polling is handled globally by FolderListView; no per-folder polling here.
 }
 
 struct AddCommandSheet: View {

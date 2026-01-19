@@ -1,11 +1,12 @@
 {
     "list": [
         {
-            "id": 123456,
+            "id": 123457,
             "commandName": "ls",
             "arguments": {
-                "params": "-al"
-            }
+                "params": " "
+            },
+            "callback": "http://127.0.0.1:12777/callback"
         }
     ]
 }

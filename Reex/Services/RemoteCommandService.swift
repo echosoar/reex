@@ -4,6 +4,7 @@ struct RemoteCommand: Codable {
     let id: Int
     let commandName: String
     let arguments: [String: String]
+    let callback: String?
 }
 
 struct RemoteCommandResponse: Codable {
@@ -66,10 +67,10 @@ class RemoteCommandService: ObservableObject {
             NSLog("Command not found: \(remoteCommand.commandName)")
             return
         }
-        
+
         // Resolve command with arguments
         let resolvedCmd = command.resolve(placeholders: remoteCommand.arguments)
-        
+
         // Start accessing security-scoped resource
         let accessGranted = folder.startAccessingSecurityScopedResource()
         defer {
@@ -77,25 +78,52 @@ class RemoteCommandService: ObservableObject {
                 folder.stopAccessingSecurityScopedResource()
             }
         }
-        
+
         // Execute the command
         let executor = CommandExecutor(shellPath: folder.shellPath, workingDirectory: folder.path)
-        let result = await executor.execute(command: resolvedCmd)
-        
+        var outputText = ""
+        var exitCode: Int32 = 0
+        do {
+            let result = await executor.execute(command: resolvedCmd)
+            outputText = result.output
+            exitCode = result.exitCode
+        } catch {
+            outputText = "Execution failed: \(error.localizedDescription)"
+            exitCode = -1
+        }
+
         // Create execution record
         let record = ExecutionRecord(
             commandName: command.name,
             command: resolvedCmd,
-            output: result.output,
-            exitCode: result.exitCode,
+            output: outputText,
+            exitCode: exitCode,
             remoteCommandId: remoteCommand.id,
             isRemote: true
         )
-        
+
         // Mark this ID as executed
         executedRemoteIds.insert(remoteCommand.id)
-        
+
         // Notify about the execution
         onCommandExecuted(record)
+
+        // Send callback if provided
+        if let cb = remoteCommand.callback, let cbUrl = URL(string: cb) {
+            var request = URLRequest(url: cbUrl)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            let body = ["output": outputText]
+            if let bodyData = try? JSONEncoder().encode(body) {
+                request.httpBody = bodyData
+                Task {
+                    do {
+                        let (_, _) = try await URLSession.shared.data(for: request)
+                    } catch {
+                        NSLog("Failed to POST callback: \(error)")
+                    }
+                }
+            }
+        }
     }
 }
