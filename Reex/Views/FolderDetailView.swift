@@ -3,6 +3,7 @@ import SwiftUI
 struct FolderDetailView: View {
     @Binding var folder: Folder
     @State private var executionRecords: [ExecutionRecord] = []
+    @State private var selectedRecord: ExecutionRecord?
     @State private var showingAddCommand = false
     @State private var showingEditCommand = false
     @State private var newCommandName = ""
@@ -115,7 +116,9 @@ struct FolderDetailView: View {
                     } else {
                         LazyVStack(spacing: 8) {
                             ForEach(executionRecords) { record in
-                                ExecutionRecordRow(record: record)
+                                ExecutionRecordRow(record: record) { selected in
+                                    selectedRecord = selected
+                                }
                             }
                         }
                         .padding(.horizontal)
@@ -161,6 +164,9 @@ struct FolderDetailView: View {
                folderIdString == folder.id.uuidString {
                 loadRecords()
             }
+        }
+        .sheet(item: $selectedRecord) { record in
+            RecordDetailView(record: record)
         }
     }
     

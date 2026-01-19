@@ -2,26 +2,26 @@ import SwiftUI
 
 struct ExecutionRecordRow: View {
     let record: ExecutionRecord
-    @State private var showingDetail = false
-    
+    var onSelect: (ExecutionRecord) -> Void
+
     var body: some View {
         Button(action: {
-            showingDetail = true
+            onSelect(record)
         }) {
             VStack(alignment: .leading, spacing: 4) {
                 HStack {
                     Text(record.commandName)
                         .font(.subheadline)
                         .fontWeight(.medium)
-                    
+
                     if record.isRemote {
                         Image(systemName: "cloud")
                             .foregroundColor(.blue)
                             .help("Remote command")
                     }
-                    
+
                     Spacer()
-                    
+
                     if record.exitCode == 0 {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundColor(.green)
@@ -29,12 +29,12 @@ struct ExecutionRecordRow: View {
                         Image(systemName: "xmark.circle.fill")
                             .foregroundColor(.red)
                     }
-                    
+
                     Text(formatDate(record.timestamp))
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
-                
+
                 Text(record.command)
                     .font(.system(.caption, design: .monospaced))
                     .foregroundColor(.secondary)
@@ -51,11 +51,8 @@ struct ExecutionRecordRow: View {
                 NSPasteboard.general.setString(record.output, forType: .string)
             }
         }
-        .sheet(isPresented: $showingDetail) {
-            RecordDetailView(record: record)
-        }
     }
-    
+
     private func formatDate(_ date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateStyle = .short
