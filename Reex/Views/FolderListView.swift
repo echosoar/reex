@@ -102,6 +102,11 @@ struct FolderListView: View {
                 // 然后再更新状态
                 self.folders = updatedFolders
 
+                // 同时更新 selectedFolder，确保状态同步
+                if self.selectedFolder?.id == newValue.id {
+                    self.selectedFolder = newValue
+                }
+
                 // Verify save
                 if let data = UserDefaults.standard.data(forKey: "folders"),
                    let decoded = try? JSONDecoder().decode([Folder].self, from: data),

@@ -6,6 +6,7 @@ struct FolderDetailView: View {
     @State private var showingAddCommand = false
     @State private var newCommandName = ""
     @State private var newCommandCmd = ""
+    @State private var commandsId = UUID() // 用于强制刷新命令列表
     // Remote polling is handled centrally in FolderListView
 
     var body: some View {
@@ -17,13 +18,13 @@ struct FolderDetailView: View {
                     Text("Folder Settings")
                         .font(.headline)
                         .padding(.horizontal)
-                    
+
                     Form {
                         Section {
                             TextField("Folder Name", text: $folder.name)
                             TextField("Folder Path", text: $folder.path)
                                 .disabled(true)
-                            
+
                             Picker("Shell Binary", selection: $folder.shellPath) {
                                 Text("/bin/bash").tag("/bin/bash")
                                 Text("/bin/sh").tag("/bin/sh")
@@ -34,10 +35,10 @@ struct FolderDetailView: View {
                     .formStyle(.grouped)
                     .frame(height: 180)
                 }
-                
+
                 Divider()
                     .padding(.horizontal)
-                
+
                 // Command list
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
@@ -49,14 +50,14 @@ struct FolderDetailView: View {
                         }
                     }
                     .padding(.horizontal)
-                    
+
                     if folder.commands.isEmpty {
                         Text("No commands yet")
                             .foregroundColor(.secondary)
                             .frame(maxWidth: .infinity)
                             .padding()
                     } else {
-                        LazyVStack(spacing: 8) {
+                        LazyVStack(spacing: 8, content: {
                             ForEach(folder.commands) { command in
                                 CommandRowView(
                                     command: command,
@@ -66,7 +67,8 @@ struct FolderDetailView: View {
                                     }
                                 )
                             }
-                        }
+                        })
+                        .id(commandsId) // 强制刷新命令列表
                         .padding(.horizontal)
                     }
                 }
@@ -208,6 +210,9 @@ struct FolderDetailView: View {
 
         // Assign the updated folder back to trigger the binding setter
         folder = updatedFolder
+
+        // 强制刷新命令列表 - 这会重新创建整个命令列表视图
+        commandsId = UUID()
 
         newCommandName = ""
         newCommandCmd = ""

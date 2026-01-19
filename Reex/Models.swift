@@ -24,11 +24,13 @@ struct Folder: Identifiable, Codable, Hashable {
     }
 
     static func == (lhs: Folder, rhs: Folder) -> Bool {
-        // Folder identity should be determined by `id` only. Using other fields
-        // for equality breaks selection and binding semantics in SwiftUI (the
-        // List/Selection uses equality to identify items). Keep equality simple
-        // so selection continues to map to the correct folder.
-        return lhs.id == rhs.id
+        // 必须比较 commands 属性，以便 SwiftUI 能检测到命令列表的变化
+        lhs.id == rhs.id &&
+        lhs.name == rhs.name &&
+        lhs.path == rhs.path &&
+        lhs.commands == rhs.commands &&
+        lhs.shellPath == rhs.shellPath &&
+        lhs.remoteCommandUrl == rhs.remoteCommandUrl
     }
 
     // Helper method to create a new Folder instance with updated commands
