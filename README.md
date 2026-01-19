@@ -14,9 +14,12 @@ A SwiftUI-based macOS application for managing and executing commands in differe
 
 ```bash
 xcodebuild -project Reex.xcodeproj -scheme Reex -configuration Release
+
+~/Library/Developer/Xcode/DerivedData/Reex-*/Build/Products/Release/Reex.app/Contents/MacOS/Reex
 ```
 
 ## Requirements
 
 - macOS 13.0 or later
 - Xcode 15.0 or later
+

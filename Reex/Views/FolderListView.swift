@@ -83,16 +83,34 @@ struct FolderListView: View {
             return .constant(folder)
         }
         return Binding(
-            get: { 
-                return self.folders[index] 
+            get: {
+                self.folders[index]
             },
             set: { newValue in
-                self.folders[index] = newValue
-                self.saveFolders()
-                
-                // Force SwiftUI to detect the change by updating the entire array
-                let updatedFolders = self.folders
+                print("[binding.set] Updating folder \(newValue.name) at index \(index)")
+                print("[binding.set] Old commands count: \(self.folders[index].commands.count)")
+                print("[binding.set] New commands count: \(newValue.commands.count)")
+                print("[binding.set] New commands: \(newValue.commands.map { "\($0.name): \($0.cmd)" })")
+
+                // 正确更新数组的方法：先复制整个数组，更新指定位置，再赋值回去
+                var updatedFolders = self.folders
+                updatedFolders[index] = newValue
+
+                // 直接使用更新后的数组保存，而不是依赖 self.folders（因为状态更新是异步的）
+                self.saveFolders(folders: updatedFolders)
+
+                // 然后再更新状态
                 self.folders = updatedFolders
+
+                // Verify save
+                if let data = UserDefaults.standard.data(forKey: "folders"),
+                   let decoded = try? JSONDecoder().decode([Folder].self, from: data),
+                   let savedFolder = decoded.first(where: { $0.id == newValue.id }) {
+                    print("[binding.set] Saved commands count: \(savedFolder.commands.count)")
+                    print("[binding.set] Saved commands: \(savedFolder.commands.map { "\($0.name): \($0.cmd)" })")
+                } else {
+                    print("[binding.set] Failed to decode saved folders")
+                }
             }
         )
     }
@@ -166,8 +184,9 @@ struct FolderListView: View {
         }
     }
     
-    private func saveFolders() {
-        if let encoded = try? JSONEncoder().encode(folders) {
+    private func saveFolders(folders: [Folder]? = nil) {
+        let foldersToSave = folders ?? self.folders
+        if let encoded = try? JSONEncoder().encode(foldersToSave) {
             UserDefaults.standard.set(encoded, forKey: "folders")
         }
     }

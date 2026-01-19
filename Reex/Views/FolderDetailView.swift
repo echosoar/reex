@@ -7,9 +7,9 @@ struct FolderDetailView: View {
     @State private var newCommandName = ""
     @State private var newCommandCmd = ""
     // Remote polling is handled centrally in FolderListView
-    
+
     var body: some View {
-        let _ = print("[FolderDetailView.body] Rendering for folder: \(folder.name) id: \(folder.id.uuidString) recordsCount: \(executionRecords.count)")
+        let _ = print("[FolderDetailView.body] Rendering for folder: \(folder.name) id: \(folder.id.uuidString) recordsCount: \(executionRecords.count) commandsCount: \(folder.commands.count)")
         ScrollView {
             VStack(spacing: 20) {
                 // Folder settings
@@ -197,17 +197,35 @@ struct FolderDetailView: View {
     
     private func addCommand() {
         let command = Command(name: newCommandName, cmd: newCommandCmd)
-        
-        // Create a new folder with the updated commands array
-        var updatedFolder = folder
-        updatedFolder.commands.append(command)
-        
+
+        print("[addCommand] Adding command: \(command.name), cmd: \(command.cmd)")
+        print("[addCommand] Before: folder commands count = \(folder.commands.count)")
+
+        // 使用 Folder 的 addingCommand 方法来创建新的文件夹实例
+        let updatedFolder = folder.addingCommand(command)
+
+        print("[addCommand] Updated folder commands count = \(updatedFolder.commands.count)")
+
         // Assign the updated folder back to trigger the binding setter
         folder = updatedFolder
-        
+
         newCommandName = ""
         newCommandCmd = ""
         showingAddCommand = false
+
+        print("[addCommand] After: folder commands count = \(folder.commands.count)")
+
+        // 验证 UserDefaults 保存
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            if let data = UserDefaults.standard.data(forKey: "folders"),
+               let decoded = try? JSONDecoder().decode([Folder].self, from: data),
+               let savedFolder = decoded.first(where: { $0.id == self.folder.id }) {
+                print("[addCommand] Saved to UserDefaults: \(savedFolder.commands.count) commands")
+                savedFolder.commands.forEach { cmd in
+                    print("  - \(cmd.name): \(cmd.cmd)")
+                }
+            }
+        }
     }
     
     private func loadRecords() {

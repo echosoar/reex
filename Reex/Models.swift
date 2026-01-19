@@ -8,7 +8,7 @@ struct Folder: Identifiable, Codable, Hashable {
     var shellPath: String
     var bookmarkData: Data?
     var remoteCommandUrl: String?
-    
+
     init(id: UUID = UUID(), name: String, path: String, commands: [Command] = [], shellPath: String = "/bin/bash", bookmarkData: Data? = nil, remoteCommandUrl: String? = nil) {
         self.id = id
         self.name = name
@@ -18,11 +18,11 @@ struct Folder: Identifiable, Codable, Hashable {
         self.bookmarkData = bookmarkData
         self.remoteCommandUrl = remoteCommandUrl
     }
-    
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
-    
+
     static func == (lhs: Folder, rhs: Folder) -> Bool {
         // Folder identity should be determined by `id` only. Using other fields
         // for equality breaks selection and binding semantics in SwiftUI (the
@@ -30,13 +30,27 @@ struct Folder: Identifiable, Codable, Hashable {
         // so selection continues to map to the correct folder.
         return lhs.id == rhs.id
     }
-    
+
+    // Helper method to create a new Folder instance with updated commands
+    func withUpdatedCommands(_ commands: [Command]) -> Folder {
+        var copy = self
+        copy.commands = commands
+        return copy
+    }
+
+    // Helper method to add a single command
+    func addingCommand(_ command: Command) -> Folder {
+        var newCommands = Array(self.commands)
+        newCommands.append(command)
+        return withUpdatedCommands(newCommands)
+    }
+
     // Helper to access the directory with security-scoped bookmark
     func accessSecurityScopedResource() -> URL? {
         guard let bookmarkData = bookmarkData else {
             return URL(fileURLWithPath: path)
         }
-        
+
         var isStale = false
         guard let url = try? URL(resolvingBookmarkData: bookmarkData,
                                   options: .withSecurityScope,
@@ -44,15 +58,15 @@ struct Folder: Identifiable, Codable, Hashable {
                                   bookmarkDataIsStale: &isStale) else {
             return URL(fileURLWithPath: path)
         }
-        
+
         return url
     }
-    
+
     func startAccessingSecurityScopedResource() -> Bool {
         guard let url = accessSecurityScopedResource() else { return false }
         return url.startAccessingSecurityScopedResource()
     }
-    
+
     func stopAccessingSecurityScopedResource() {
         guard let url = accessSecurityScopedResource() else { return }
         url.stopAccessingSecurityScopedResource()
