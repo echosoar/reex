@@ -46,6 +46,7 @@ struct FolderListView: View {
         } detail: {
             if let folder = selectedFolder {
                 FolderDetailView(folder: binding(for: folder))
+                    .id(folder.id)  // Force view recreation when folder changes
             } else {
                 Text("Select a folder")
                     .foregroundColor(.secondary)
@@ -244,6 +245,7 @@ struct FolderListView: View {
                     records.insert(record, at: 0)
                     if let enc = try? JSONEncoder().encode(records) {
                         UserDefaults.standard.set(enc, forKey: key)
+                        print("[pollOnce] Saved record for folder:\(folder.name) id:\(folder.id.uuidString) key:\(key) outputPreview:\(resultOutput.prefix(80))")
                     }
 
                     // Mark executed

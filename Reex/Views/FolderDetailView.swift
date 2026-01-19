@@ -9,6 +9,7 @@ struct FolderDetailView: View {
     // Remote polling is handled centrally in FolderListView
     
     var body: some View {
+        let _ = print("[FolderDetailView.body] Rendering for folder: \(folder.name) id: \(folder.id.uuidString) recordsCount: \(executionRecords.count)")
         ScrollView {
             VStack(spacing: 20) {
                 // Folder settings
@@ -125,17 +126,21 @@ struct FolderDetailView: View {
             )
         }
         .onAppear {
+            print("[FolderDetailView.onAppear] folder: \(folder.name) id: \(folder.id.uuidString)")
             loadRecords()
         }
         .onDisappear {
         }
-        .onChange(of: folder.id) { _ in
+        .onChange(of: folder.id) { newId in
             // When the selected folder changes, reload its records
+            print("[FolderDetailView.onChange] folder.id changed to: \(newId) folder.name: \(folder.name) before loadRecords, current recordsCount: \(executionRecords.count)")
             loadRecords()
+            print("[FolderDetailView.onChange] after loadRecords, new recordsCount: \(executionRecords.count)")
         }
         .onReceive(NotificationCenter.default.publisher(for: Notification.Name("executionRecordsUpdated"))) { notification in
-            // If a remote execution updated records for this folder, reload
-            if let idStr = notification.object as? String, idStr == folder.id.uuidString {
+            // Only reload if the notification is for the current folder
+            if let folderIdString = notification.object as? String,
+               folderIdString == folder.id.uuidString {
                 loadRecords()
             }
         }
@@ -145,27 +150,47 @@ struct FolderDetailView: View {
         let resolvedCmd = command.resolve(placeholders: params)
         
         Task {
-            // Start accessing security-scoped resource
+            // Capture folder identity and working info at the start so switching folders
+            // while the task runs won't cause the record to be saved under the wrong folder.
+            let capturedFolderId = folder.id
+            let capturedWorkingDir = folder.path
+            let capturedShell = folder.shellPath
+
+            // Start accessing security-scoped resource for the captured folder
             let accessGranted = folder.startAccessingSecurityScopedResource()
             defer {
                 if accessGranted {
                     folder.stopAccessingSecurityScopedResource()
                 }
             }
-            
-            let executor = CommandExecutor(shellPath: folder.shellPath, workingDirectory: folder.path)
+
+            let executor = CommandExecutor(shellPath: capturedShell, workingDirectory: capturedWorkingDir)
             let result = await executor.execute(command: resolvedCmd)
-            
+
             let record = ExecutionRecord(
                 commandName: command.name,
                 command: resolvedCmd,
                 output: result.output,
                 exitCode: result.exitCode
             )
-            
+
+            // Persist the record to UserDefaults under the captured folder id
+            let key = "records_\(capturedFolderId.uuidString)"
+            var recordsForFolder: [ExecutionRecord] = []
+            if let d = UserDefaults.standard.data(forKey: key), let dec = try? JSONDecoder().decode([ExecutionRecord].self, from: d) {
+                recordsForFolder = dec
+            }
+            recordsForFolder.insert(record, at: 0)
+            if let enc = try? JSONEncoder().encode(recordsForFolder) {
+                UserDefaults.standard.set(enc, forKey: key)
+                print("[executeCommand] Persisted record for capturedFolder:\(capturedFolderId.uuidString) key:\(key) command:\(command.name) outputPreview:\(record.output.prefix(80))")
+            }
+
+            // Only update this view's in-memory state if the view is still showing the same folder
             await MainActor.run {
-                executionRecords.insert(record, at: 0)
-                saveRecords()
+                if folder.id == capturedFolderId {
+                    executionRecords.insert(record, at: 0)
+                }
             }
         }
     }
@@ -186,15 +211,23 @@ struct FolderDetailView: View {
     }
     
     private func loadRecords() {
-        if let data = UserDefaults.standard.data(forKey: "records_\(folder.id.uuidString)"),
+        let key = "records_\(folder.id.uuidString)"
+        if let data = UserDefaults.standard.data(forKey: key),
            let decoded = try? JSONDecoder().decode([ExecutionRecord].self, from: data) {
             executionRecords = decoded
+            print("[loadRecords] Loaded \(executionRecords.count) records for folder:\(folder.name) id:\(folder.id.uuidString)")
+        } else {
+            // Always clear executionRecords if no data found, to prevent showing stale data from previous folder
+            executionRecords = []
+            print("[loadRecords] No records found for folder:\(folder.name) id:\(folder.id.uuidString), cleared records")
         }
     }
     
     private func saveRecords() {
         if let encoded = try? JSONEncoder().encode(executionRecords) {
-            UserDefaults.standard.set(encoded, forKey: "records_\(folder.id.uuidString)")
+            let key = "records_\(folder.id.uuidString)"
+            UserDefaults.standard.set(encoded, forKey: key)
+            print("[saveRecords] Saved \(executionRecords.count) records for folder:\(folder.name) id:\(folder.id.uuidString) key:\(key)")
         }
     }
     

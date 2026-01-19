@@ -24,13 +24,11 @@ struct Folder: Identifiable, Codable, Hashable {
     }
     
     static func == (lhs: Folder, rhs: Folder) -> Bool {
-        lhs.id == rhs.id &&
-        lhs.name == rhs.name &&
-        lhs.path == rhs.path &&
-        lhs.commands == rhs.commands &&
-        lhs.shellPath == rhs.shellPath &&
-        lhs.bookmarkData == rhs.bookmarkData &&
-        lhs.remoteCommandUrl == rhs.remoteCommandUrl
+        // Folder identity should be determined by `id` only. Using other fields
+        // for equality breaks selection and binding semantics in SwiftUI (the
+        // List/Selection uses equality to identify items). Keep equality simple
+        // so selection continues to map to the correct folder.
+        return lhs.id == rhs.id
     }
     
     // Helper to access the directory with security-scoped bookmark
