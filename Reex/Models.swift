@@ -47,6 +47,22 @@ struct Folder: Identifiable, Codable, Hashable {
         return withUpdatedCommands(newCommands)
     }
 
+    // Helper method to update an existing command
+    func updatingCommand(_ command: Command) -> Folder {
+        var newCommands = Array(self.commands)
+        if let index = newCommands.firstIndex(where: { $0.id == command.id }) {
+            newCommands[index] = command
+        }
+        return withUpdatedCommands(newCommands)
+    }
+
+    // Helper method to remove a command
+    func removingCommand(_ command: Command) -> Folder {
+        var newCommands = Array(self.commands)
+        newCommands.removeAll { $0.id == command.id }
+        return withUpdatedCommands(newCommands)
+    }
+
     // Helper to access the directory with security-scoped bookmark
     func accessSecurityScopedResource() -> URL? {
         guard let bookmarkData = bookmarkData else {

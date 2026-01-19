@@ -4,8 +4,10 @@ struct FolderDetailView: View {
     @Binding var folder: Folder
     @State private var executionRecords: [ExecutionRecord] = []
     @State private var showingAddCommand = false
+    @State private var showingEditCommand = false
     @State private var newCommandName = ""
     @State private var newCommandCmd = ""
+    @State private var editingCommand: Command?
     @State private var commandsId = UUID() // 用于强制刷新命令列表
     // Remote polling is handled centrally in FolderListView
 
@@ -64,6 +66,9 @@ struct FolderDetailView: View {
                                     folder: folder,
                                     onExecute: { cmd, params in
                                         executeCommand(command: cmd, params: params)
+                                    },
+                                    onEdit: { cmd in
+                                        editCommand(cmd)
                                     }
                                 )
                             }
@@ -126,6 +131,17 @@ struct FolderDetailView: View {
                 commandCmd: $newCommandCmd,
                 onAdd: addCommand
             )
+        }
+        .sheet(isPresented: $showingEditCommand) {
+            if let editingCommand = editingCommand {
+                EditCommandSheet(
+                    command: editingCommand,
+                    commandName: $newCommandName,
+                    commandCmd: $newCommandCmd,
+                    onUpdate: updateCommand,
+                    onDelete: { deleteCommand(editingCommand) }
+                )
+            }
         }
         .onAppear {
             print("[FolderDetailView.onAppear] folder: \(folder.name) id: \(folder.id.uuidString)")
@@ -232,6 +248,74 @@ struct FolderDetailView: View {
             }
         }
     }
+
+    private func editCommand(_ command: Command) {
+        editingCommand = command
+        newCommandName = command.name
+        newCommandCmd = command.cmd
+        showingEditCommand = true
+    }
+
+    private func updateCommand() {
+        guard let editingCommand = editingCommand else { return }
+
+        let updatedCommand = Command(
+            id: editingCommand.id,
+            name: newCommandName,
+            cmd: newCommandCmd
+        )
+
+        print("[updateCommand] Updating command: \(updatedCommand.name), cmd: \(updatedCommand.cmd)")
+        print("[updateCommand] Before: folder commands count = \(folder.commands.count)")
+
+        let updatedFolder = folder.updatingCommand(updatedCommand)
+        folder = updatedFolder
+
+        commandsId = UUID()
+
+        newCommandName = ""
+        newCommandCmd = ""
+        showingEditCommand = false
+        self.editingCommand = nil
+
+        print("[updateCommand] After: folder commands count = \(folder.commands.count)")
+
+        // 验证 UserDefaults 保存
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            if let data = UserDefaults.standard.data(forKey: "folders"),
+               let decoded = try? JSONDecoder().decode([Folder].self, from: data),
+               let savedFolder = decoded.first(where: { $0.id == self.folder.id }) {
+                print("[updateCommand] Saved to UserDefaults: \(savedFolder.commands.count) commands")
+                savedFolder.commands.forEach { cmd in
+                    print("  - \(cmd.name): \(cmd.cmd)")
+                }
+            }
+        }
+    }
+
+    private func deleteCommand(_ command: Command) {
+        print("[deleteCommand] Deleting command: \(command.name), cmd: \(command.cmd)")
+        print("[deleteCommand] Before: folder commands count = \(folder.commands.count)")
+
+        let updatedFolder = folder.removingCommand(command)
+        folder = updatedFolder
+
+        commandsId = UUID()
+
+        print("[deleteCommand] After: folder commands count = \(folder.commands.count)")
+
+        // 验证 UserDefaults 保存
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            if let data = UserDefaults.standard.data(forKey: "folders"),
+               let decoded = try? JSONDecoder().decode([Folder].self, from: data),
+               let savedFolder = decoded.first(where: { $0.id == self.folder.id }) {
+                print("[deleteCommand] Saved to UserDefaults: \(savedFolder.commands.count) commands")
+                savedFolder.commands.forEach { cmd in
+                    print("  - \(cmd.name): \(cmd.cmd)")
+                }
+            }
+        }
+    }
     
     private func loadRecords() {
         let key = "records_\(folder.id.uuidString)"
@@ -262,15 +346,15 @@ struct AddCommandSheet: View {
     @Binding var commandCmd: String
     let onAdd: () -> Void
     @Environment(\.dismiss) private var dismiss
-    
+
     var body: some View {
         VStack(spacing: 20) {
             Text("Add New Command")
                 .font(.headline)
-            
+
             TextField("Command Name", text: $commandName)
                 .textFieldStyle(.roundedBorder)
-            
+
             VStack(alignment: .leading) {
                 Text("Command")
                     .font(.caption)
@@ -278,22 +362,78 @@ struct AddCommandSheet: View {
                     .font(.system(.body, design: .monospaced))
                     .frame(height: 100)
                     .border(Color.gray.opacity(0.3))
-                
+
                 Text("Use {placeholder} for parameters")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
-            
+
             HStack {
                 Button("Cancel") {
                     dismiss()
                 }
                 .keyboardShortcut(.cancelAction)
-                
+
                 Spacer()
-                
+
                 Button("Add") {
                     onAdd()
+                    dismiss()
+                }
+                .keyboardShortcut(.defaultAction)
+                .disabled(commandName.isEmpty || commandCmd.isEmpty)
+            }
+        }
+        .padding()
+        .frame(width: 500)
+    }
+}
+
+struct EditCommandSheet: View {
+    let command: Command
+    @Binding var commandName: String
+    @Binding var commandCmd: String
+    let onUpdate: () -> Void
+    let onDelete: () -> Void
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("Edit Command")
+                .font(.headline)
+
+            TextField("Command Name", text: $commandName)
+                .textFieldStyle(.roundedBorder)
+
+            VStack(alignment: .leading) {
+                Text("Command")
+                    .font(.caption)
+                TextEditor(text: $commandCmd)
+                    .font(.system(.body, design: .monospaced))
+                    .frame(height: 100)
+                    .border(Color.gray.opacity(0.3))
+
+                Text("Use {placeholder} for parameters")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+
+            HStack {
+                Button("Delete") {
+                    onDelete()
+                    dismiss()
+                }
+                .foregroundColor(.red)
+                .keyboardShortcut(.cancelAction)
+
+                Spacer()
+
+                Button("Cancel") {
+                    dismiss()
+                }
+
+                Button("Update") {
+                    onUpdate()
                     dismiss()
                 }
                 .keyboardShortcut(.defaultAction)

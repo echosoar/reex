@@ -4,7 +4,8 @@ struct CommandRowView: View {
     let command: Command
     let folder: Folder
     let onExecute: (Command, [String: String]) -> Void
-    
+    let onEdit: (Command) -> Void
+
     @State private var placeholderValues: [String: String] = [:]
     @State private var isExecuting = false
     
@@ -13,9 +14,15 @@ struct CommandRowView: View {
             HStack {
                 Text(command.name)
                     .font(.headline)
-                
+
                 Spacer()
-                
+
+                Button("Edit") {
+                    onEdit(command)
+                }
+                .buttonStyle(.borderless)
+                .foregroundColor(.blue)
+
                 if !placeholders.isEmpty {
                     Button("Execute") {
                         executeCommand()
