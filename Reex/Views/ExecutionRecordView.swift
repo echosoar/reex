@@ -22,7 +22,11 @@ struct ExecutionRecordRow: View {
 
                     Spacer()
 
-                    if record.exitCode == 0 {
+                    if record.isRunning {
+                        ProgressView()
+                            .scaleEffect(0.5)
+                            .help("Executing...")
+                    } else if record.exitCode == 0 {
                         Image(systemName: "checkmark.circle.fill")
                             .foregroundColor(.green)
                     } else {
@@ -86,23 +90,27 @@ struct ExecutionRecordView: View {
                                 Text(record.commandName)
                                     .font(.subheadline)
                                     .fontWeight(.medium)
-                                
+
                                 if record.isRemote {
                                     Image(systemName: "cloud")
                                         .foregroundColor(.blue)
                                         .help("Remote command")
                                 }
-                                
+
                                 Spacer()
-                                
-                                if record.exitCode == 0 {
+
+                                if record.isRunning {
+                                    ProgressView()
+                                        .scaleEffect(0.5)
+                                        .help("Executing...")
+                                } else if record.exitCode == 0 {
                                     Image(systemName: "checkmark.circle.fill")
                                         .foregroundColor(.green)
                                 } else {
                                     Image(systemName: "xmark.circle.fill")
                                         .foregroundColor(.red)
                                 }
-                                
+
                                 Text(formatDate(record.timestamp))
                                     .font(.caption)
                                     .foregroundColor(.secondary)

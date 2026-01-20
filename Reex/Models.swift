@@ -146,8 +146,9 @@ struct ExecutionRecord: Identifiable, Codable {
     var exitCode: Int32
     var remoteCommandId: Int?
     var isRemote: Bool
-    
-    init(id: UUID = UUID(), commandName: String, command: String, output: String, timestamp: Date = Date(), exitCode: Int32 = 0, remoteCommandId: Int? = nil, isRemote: Bool = false) {
+    var isRunning: Bool // 添加执行状态字段
+
+    init(id: UUID = UUID(), commandName: String, command: String, output: String, timestamp: Date = Date(), exitCode: Int32 = 0, remoteCommandId: Int? = nil, isRemote: Bool = false, isRunning: Bool = false) {
         self.id = id
         self.commandName = commandName
         self.command = command
@@ -156,5 +157,6 @@ struct ExecutionRecord: Identifiable, Codable {
         self.exitCode = exitCode
         self.remoteCommandId = remoteCommandId
         self.isRemote = isRemote
+        self.isRunning = isRunning
     }
 }

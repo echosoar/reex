@@ -172,13 +172,26 @@ struct FolderDetailView: View {
     
     private func executeCommand(command: Command, params: [String: String]) {
         let resolvedCmd = command.resolve(placeholders: params)
-        
+
+        // 创建正在运行的记录并立即显示在UI上
+        let runningRecord = ExecutionRecord(
+            commandName: command.name,
+            command: resolvedCmd,
+            output: "Executing...",
+            exitCode: 0,
+            isRunning: true
+        )
+
+        // 立即更新UI显示正在运行的记录
+        executionRecords.insert(runningRecord, at: 0)
+
         Task {
             // Capture folder identity and working info at the start so switching folders
             // while the task runs won't cause the record to be saved under the wrong folder.
             let capturedFolderId = folder.id
             let capturedWorkingDir = folder.path
             let capturedShell = folder.shellPath
+            let capturedRecordId = runningRecord.id
 
             // Start accessing security-scoped resource for the captured folder
             let accessGranted = folder.startAccessingSecurityScopedResource()
@@ -191,7 +204,8 @@ struct FolderDetailView: View {
             let executor = CommandExecutor(shellPath: capturedShell, workingDirectory: capturedWorkingDir)
             let result = await executor.execute(command: resolvedCmd)
 
-            let record = ExecutionRecord(
+            let completedRecord = ExecutionRecord(
+                id: capturedRecordId, // 保持相同的ID，用于替换正在运行的记录
                 commandName: command.name,
                 command: resolvedCmd,
                 output: result.output,
@@ -204,16 +218,25 @@ struct FolderDetailView: View {
             if let d = UserDefaults.standard.data(forKey: key), let dec = try? JSONDecoder().decode([ExecutionRecord].self, from: d) {
                 recordsForFolder = dec
             }
-            recordsForFolder.insert(record, at: 0)
+            // 替换正在运行的记录为完成的记录
+            if let index = recordsForFolder.firstIndex(where: { $0.id == capturedRecordId }) {
+                recordsForFolder[index] = completedRecord
+            } else {
+                recordsForFolder.insert(completedRecord, at: 0)
+            }
             if let enc = try? JSONEncoder().encode(recordsForFolder) {
                 UserDefaults.standard.set(enc, forKey: key)
-                print("[executeCommand] Persisted record for capturedFolder:\(capturedFolderId.uuidString) key:\(key) command:\(command.name) outputPreview:\(record.output.prefix(80))")
+                print("[executeCommand] Persisted record for capturedFolder:\(capturedFolderId.uuidString) key:\(key) command:\(command.name) outputPreview:\(completedRecord.output.prefix(80))")
             }
 
             // Only update this view's in-memory state if the view is still showing the same folder
             await MainActor.run {
                 if folder.id == capturedFolderId {
-                    executionRecords.insert(record, at: 0)
+                    if let index = executionRecords.firstIndex(where: { $0.id == capturedRecordId }) {
+                        executionRecords[index] = completedRecord
+                    } else {
+                        executionRecords.insert(completedRecord, at: 0)
+                    }
                 }
             }
         }
