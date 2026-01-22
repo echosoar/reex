@@ -8,7 +8,8 @@ struct FolderListView: View {
     @State private var newFolderPath = ""
     @State private var newFolderURL: URL?
     @State private var pollingTask: Task<Void, Never>?
-    
+    @State private var currentExecutionTasks: [UUID: (task: Task<Void, Never>, executor: CommandExecutor, remoteCommand: any Codable)] = [:]
+
     var body: some View {
         NavigationSplitView {
             VStack {
@@ -210,7 +211,14 @@ struct FolderListView: View {
     private func stopPollingRemoteConfigs() {
         pollingTask?.cancel()
         pollingTask = nil
+        // 取消所有正在执行的任务
+        for (_, taskInfo) in currentExecutionTasks {
+            taskInfo.executor.cancel()
+            taskInfo.task.cancel()
+        }
+        currentExecutionTasks.removeAll()
     }
+
 
     private func pollOnce() async {
         // Snapshot folders on main actor to avoid races
@@ -233,73 +241,143 @@ struct FolderListView: View {
                 let decoded = try JSONDecoder().decode(RemoteResponse.self, from: data)
                 guard let first = decoded.list.first else { continue }
 
+                print("decoded remote command: id:\(first.id) commandName:\(first.commandName) arguments:\(first.arguments ?? [:]) callback:\(first.callback ?? "nil")")
+
                 // Check if already executed
                 let executedKey = "remote_executed_\(folder.id.uuidString)"
                 var executed = UserDefaults.standard.array(forKey: executedKey) as? [Int] ?? []
                 if executed.contains(first.id) { continue }
 
-                    if let cmd = folder.commands.first(where: { $0.name == first.commandName }) {
-                    let params = first.arguments ?? [:]
+                // 如果该文件夹有正在执行的老任务，取消它
+                let existingTaskInfo = await MainActor.run { currentExecutionTasks[folder.id] }
+                if let existingTaskInfo = existingTaskInfo {
+                    print("Canceling current task for folder \(folder.name) (current task id: \(String(describing: (existingTaskInfo.remoteCommand as? RemoteItem)?.id)), new task id: \(first.id))")
 
-                    // Start security scope if needed
-                    let accessGranted = folder.startAccessingSecurityScopedResource()
-                    defer {
-                        if accessGranted { folder.stopAccessingSecurityScopedResource() }
+                    // 取消当前执行
+                    existingTaskInfo.executor.cancel()
+                    existingTaskInfo.task.cancel()
+
+                    // 从 currentExecutionTasks 中移除老任务
+                    await MainActor.run {
+                        currentExecutionTasks.removeValue(forKey: folder.id)
                     }
 
-                    let executor = CommandExecutor(shellPath: folder.shellPath, workingDirectory: folder.path)
-                    var resultOutput = ""
-                    var resultExit: Int32 = 0
-                    do {
-                        let result = await executor.execute(command: cmd.resolve(placeholders: params))
-                        resultOutput = result.output
-                        resultExit = result.exitCode
-                    } catch {
-                        resultOutput = "Execution failed: \(error.localizedDescription)"
-                        resultExit = -1
-                    }
+                    // 为老任务创建超时记录
+                    if let oldRemoteCommand = existingTaskInfo.remoteCommand as? RemoteItem {
+                        let timeoutRecord = ExecutionRecord(
+                            commandName: "Unknown",
+                            command: "",
+                            output: "Execution timed out (new task arrived)",
+                            exitCode: -2, // 超时退出码
+                            remoteCommandId: oldRemoteCommand.id,
+                            isRemote: true
+                        )
+                        saveExecutionRecord(folder: folder, record: timeoutRecord)
+                        executed.append(oldRemoteCommand.id)
+                        UserDefaults.standard.set(executed, forKey: executedKey)
+                        NotificationCenter.default.post(name: Notification.Name("executionRecordsUpdated"), object: folder.id.uuidString)
 
-                    // Save record
-                    let key = executionRecordsKey(for: folder)
-                    var records: [ExecutionRecord] = []
-                    if let d = UserDefaults.standard.data(forKey: key), let dec = try? JSONDecoder().decode([ExecutionRecord].self, from: d) {
-                        records = dec
-                    }
-                    let record = ExecutionRecord(commandName: cmd.name, command: cmd.resolve(placeholders: params), output: resultOutput, exitCode: resultExit, remoteCommandId: first.id, isRemote: true)
-                    records.insert(record, at: 0)
-                    if let enc = try? JSONEncoder().encode(records) {
-                        UserDefaults.standard.set(enc, forKey: key)
-                        print("[pollOnce] Saved record for folder:\(folder.name) id:\(folder.id.uuidString) key:\(key) outputPreview:\(resultOutput.prefix(80))")
-                    }
-
-                    // Mark executed
-                    executed.append(first.id)
-                    UserDefaults.standard.set(executed, forKey: executedKey)
-
-                    // Notify listeners to reload
-                    NotificationCenter.default.post(name: Notification.Name("executionRecordsUpdated"), object: folder.id.uuidString)
-                    // If callback provided, POST output
-                    if let cb = first.callback, let cbUrl = URL(string: cb) {
-                        Task {
-                            var request = URLRequest(url: cbUrl)
-                            request.httpMethod = "POST"
-                            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-                            let body = ["output": resultOutput]
-                            if let bodyData = try? JSONEncoder().encode(body) {
-                                do {
-                                    request.httpBody = bodyData
-                                    let (_, _) = try await URLSession.shared.data(for: request)
-                                } catch {
-                                    print("Failed to POST callback: \(error)")
+                        // 发送超时回调
+                        if let cb = oldRemoteCommand.callback, let cbUrl = URL(string: cb) {
+                            Task {
+                                var request = URLRequest(url: cbUrl)
+                                request.httpMethod = "POST"
+                                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                                let body = ["output": "Execution timed out (new task arrived)"]
+                                if let bodyData = try? JSONEncoder().encode(body) {
+                                    do {
+                                        request.httpBody = bodyData
+                                        let (_, _) = try await URLSession.shared.data(for: request)
+                                    } catch {
+                                        print("Failed to POST callback: \(error)")
+                                    }
                                 }
                             }
                         }
+                    }
+                }
+
+                // 执行新任务
+                if let cmd = folder.commands.first(where: { $0.name == first.commandName }) {
+                    let executor = CommandExecutor(shellPath: folder.shellPath, workingDirectory: folder.path)
+                    let task = Task {
+                        let params = first.arguments ?? [:]
+
+                        // Start security scope if needed
+                        let accessGranted = folder.startAccessingSecurityScopedResource()
+                        defer {
+                            if accessGranted { folder.stopAccessingSecurityScopedResource() }
+                        }
+
+                        var resultOutput = ""
+                        var resultExit: Int32 = 0
+                        do {
+                            let result = await executor.execute(command: cmd.resolve(placeholders: params))
+                            resultOutput = result.output
+                            resultExit = result.exitCode
+                        } catch {
+                            resultOutput = "Execution failed: \(error.localizedDescription)"
+                            resultExit = -1
+                        }
+
+                        // Save record
+                        let record = ExecutionRecord(commandName: cmd.name, command: cmd.resolve(placeholders: params), output: resultOutput, exitCode: resultExit, remoteCommandId: first.id, isRemote: true)
+                        saveExecutionRecord(folder: folder, record: record)
+
+                        // Mark executed
+                        var executed = UserDefaults.standard.array(forKey: executedKey) as? [Int] ?? []
+                        executed.append(first.id)
+                        UserDefaults.standard.set(executed, forKey: executedKey)
+
+                        // Notify listeners to reload
+                        NotificationCenter.default.post(name: Notification.Name("executionRecordsUpdated"), object: folder.id.uuidString)
+
+                        // If callback provided, POST output
+                        if let cb = first.callback, let cbUrl = URL(string: cb) {
+                            Task {
+                                var request = URLRequest(url: cbUrl)
+                                request.httpMethod = "POST"
+                                request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+                                let body = ["output": resultOutput]
+                                if let bodyData = try? JSONEncoder().encode(body) {
+                                    do {
+                                        request.httpBody = bodyData
+                                        let (_, _) = try await URLSession.shared.data(for: request)
+                                    } catch {
+                                        print("Failed to POST callback: \(error)")
+                                    }
+                                }
+                            }
+                        }
+
+                        // 任务完成后移除追踪（必须在主 Actor 上执行）
+                        await MainActor.run {
+                            currentExecutionTasks.removeValue(forKey: folder.id)
+                        }
+                    }
+
+                    // 追踪新任务（必须在主 Actor 上执行）
+                    await MainActor.run {
+                        currentExecutionTasks[folder.id] = (task: task, executor: executor, remoteCommand: first)
                     }
                 }
             } catch {
                 // ignore network/parse errors for now
                 continue
             }
+        }
+    }
+
+    private func saveExecutionRecord(folder: Folder, record: ExecutionRecord) {
+        let key = executionRecordsKey(for: folder)
+        var records: [ExecutionRecord] = []
+        if let d = UserDefaults.standard.data(forKey: key), let dec = try? JSONDecoder().decode([ExecutionRecord].self, from: d) {
+            records = dec
+        }
+        records.insert(record, at: 0)
+        if let enc = try? JSONEncoder().encode(records) {
+            UserDefaults.standard.set(enc, forKey: key)
+            print("[saveExecutionRecord] Saved record for folder:\(folder.name) id:\(folder.id.uuidString) key:\(key) outputPreview:\(record.output.prefix(80))")
         }
     }
 }
